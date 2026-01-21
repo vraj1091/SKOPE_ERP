@@ -1,0 +1,79 @@
+version: "3.8"
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    container_name: skope_erp_db_dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-skope_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-skope_password}
+      POSTGRES_DB: ${POSTGRES_DB:-skope_erp}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - skope_network_dev
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-skope_user}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend API (Development mode with hot reload)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: skope_erp_backend_dev
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-skope_user}:${POSTGRES_PASSWORD:-skope_password}@db:5432/${POSTGRES_DB:-skope_erp}
+      SECRET_KEY: ${SECRET_KEY:-dev-secret-key-not-for-production}
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 30
+      REFRESH_TOKEN_EXPIRE_DAYS: 7
+    volumes:
+      - ./backend:/app
+      - backend_uploads_dev:/app/uploads
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - skope_network_dev
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  # Frontend (Development mode with Vite)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: skope_erp_frontend_dev
+    restart: unless-stopped
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    networks:
+      - skope_network_dev
+    command: npm run dev -- --host
+
+volumes:
+  postgres_data_dev:
+    driver: local
+  backend_uploads_dev:
+    driver: local
+
+networks:
+  skope_network_dev:
+    driver: bridge

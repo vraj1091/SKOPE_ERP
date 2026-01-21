@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 import random
 
 # Delete existing database
-db_path = "rms_database.db"
+db_path = "rms_new.db"
 if os.path.exists(db_path):
     os.remove(db_path)
     print(f"Deleted existing database: {db_path}")
