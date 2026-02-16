@@ -5,7 +5,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from app.api.v1 import auth, inventory, sales, customers, financial, reports, users, campaigns, marketing, stores, chatbot
+from app.api.v1 import auth, inventory, sales, customers, financial, reports, users, campaigns, marketing, stores, chatbot, dashboard, system, automation, ads, comparison
 from app.core.config import settings
 from app.db.database import engine
 from app.db import models
@@ -20,15 +20,33 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# CORS configuration
+# CORS configuration - Allow all localhost ports for development
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:5173"],
+    allow_origins=["*"],  # Allow all origins in development
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
     expose_headers=["Content-Disposition"],
 )
+
+from fastapi import Request
+from fastapi.responses import JSONResponse
+import traceback
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    error_msg = f"Global Error Handler caught: {str(exc)}\n{traceback.format_exc()}"
+    print(error_msg)
+    # Write to a specific debug file that we can read
+    with open("backend_critical_error.log", "a") as f:
+        f.write(f"\n\n--- ERROR AT {request.url} ---\n")
+        f.write(error_msg)
+    
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Internal Server Error", "error": str(exc)},
+    )
 
 # Create upload directories
 os.makedirs("backend/uploads/creative_assets", exist_ok=True)
@@ -50,6 +68,11 @@ app.include_router(reports.router, prefix="/api/v1/reports", tags=["Reports"])
 app.include_router(campaigns.router, prefix="/api/v1/campaigns", tags=["Marketing Campaigns"])
 app.include_router(marketing.router, prefix="/api/v1/marketing", tags=["Marketing Integrations"])
 app.include_router(chatbot.router, prefix="/api/v1/chatbot", tags=["AI Chatbot"])
+app.include_router(dashboard.router, prefix="/api/v1/dashboard", tags=["Dashboard"])
+app.include_router(system.router, prefix="/api/v1/system", tags=["System"])
+app.include_router(automation.router, prefix="/api/v1/automation", tags=["Automation & AI"])
+app.include_router(ads.router, prefix="/api/v1/ads", tags=["Ad Platform Integration"])
+app.include_router(comparison.router, prefix="/api/v1/comparison", tags=["Comparison Analytics"])
 
 from app.api.dependencies import get_db
 from app.db.database import SessionLocal
@@ -141,4 +164,10 @@ def health_check():
 
 if __name__ == "__main__":
     import uvicorn
+    from pathlib import Path
+    # Ensure CWD is the backend directory
+    backend_dir = Path(__file__).resolve().parent.parent
+    os.chdir(str(backend_dir))
+    print(f"[MAIN] Working directory: {os.getcwd()}")
     uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
+
