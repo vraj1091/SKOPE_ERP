@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { SparklesIcon, ArrowTrendingUpIcon, ArrowTrendingDownIcon, LightBulbIcon, ChartBarIcon } from '@heroicons/react/24/outline'
+import { PageHeader, PremiumCard, StatCard, Badge } from '../components/PremiumUI'
 
 interface Insight {
   id: string
@@ -107,147 +108,135 @@ export default function AIInsights() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 rounded-2xl shadow-2xl p-8 text-white">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <SparklesIcon className="w-10 h-10" />
-              <h1 className="text-4xl font-black">AI Insights</h1>
-            </div>
-            <p className="text-xl text-white/90">
-              Intelligent business recommendations powered by data analysis
-            </p>
-          </div>
-          <div className="text-right">
-            <div className="text-5xl font-black">{insights.length}</div>
-            <div className="text-sm text-white/80 font-semibold">Active Insights</div>
-          </div>
-        </div>
-      </div>
+    <div className="space-y-8">
+      {/* Page Header */}
+      <PageHeader
+        title="AI Insights"
+        subtitle="Intelligent business recommendations powered by data analysis"
+        icon={SparklesIcon}
+        actions={
+          <Badge color="violet">{insights.length} Active Insights</Badge>
+        }
+      />
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl p-6 text-white shadow-xl">
-          <div className="flex items-center justify-between mb-3">
-            <ArrowTrendingUpIcon className="w-8 h-8" />
-            <span className="text-3xl font-black">
-              {insights.filter(i => i.type === 'opportunity').length}
-            </span>
-          </div>
-          <div className="font-bold text-lg">Opportunities</div>
-          <div className="text-sm text-white/80 mt-1">Growth potential identified</div>
-        </div>
-
-        <div className="bg-gradient-to-br from-red-500 to-orange-600 rounded-xl p-6 text-white shadow-xl">
-          <div className="flex items-center justify-between mb-3">
-            <ArrowTrendingDownIcon className="w-8 h-8" />
-            <span className="text-3xl font-black">
-              {insights.filter(i => i.type === 'warning').length}
-            </span>
-          </div>
-          <div className="font-bold text-lg">Warnings</div>
-          <div className="text-sm text-white/80 mt-1">Issues requiring attention</div>
-        </div>
-
-        <div className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl p-6 text-white shadow-xl">
-          <div className="flex items-center justify-between mb-3">
-            <LightBulbIcon className="w-8 h-8" />
-            <span className="text-3xl font-black">
-              {insights.filter(i => i.type === 'recommendation').length}
-            </span>
-          </div>
-          <div className="font-bold text-lg">Recommendations</div>
-          <div className="text-sm text-white/80 mt-1">Actionable suggestions</div>
-        </div>
+        <StatCard
+          title="Opportunities"
+          value={insights.filter(i => i.type === 'opportunity').length}
+          subtitle="Growth potential identified"
+          icon={ArrowTrendingUpIcon}
+          color="emerald"
+          delay={100}
+        />
+        <StatCard
+          title="Warnings"
+          value={insights.filter(i => i.type === 'warning').length}
+          subtitle="Issues requiring attention"
+          icon={ArrowTrendingDownIcon}
+          color="rose"
+          delay={200}
+        />
+        <StatCard
+          title="Recommendations"
+          value={insights.filter(i => i.type === 'recommendation').length}
+          subtitle="Actionable suggestions"
+          icon={LightBulbIcon}
+          color="blue"
+          delay={300}
+        />
       </div>
 
       {/* Insights List */}
-      <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl border border-neutral-200 overflow-hidden">
-        <div className="p-6 border-b border-neutral-200 bg-gradient-to-r from-neutral-50 to-white">
-          <h2 className="text-2xl font-bold text-neutral-800 flex items-center gap-3">
-            <ChartBarIcon className="w-7 h-7 text-primary" />
+      <PremiumCard delay={400}>
+        <div className="p-6 border-b border-border">
+          <h2 className="text-2xl font-bold text-text-primary flex items-center gap-3">
+            <ChartBarIcon className="w-7 h-7 text-primary-400" />
             Generated Insights
           </h2>
-          <p className="text-neutral-600 mt-1">AI-powered analysis of your business data</p>
+          <p className="text-text-tertiary mt-1">AI-powered analysis of your business data</p>
         </div>
 
         <div className="p-6">
           {loading ? (
             <div className="flex items-center justify-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-              <span className="ml-4 text-neutral-600 font-semibold">Analyzing data...</span>
+              <div className="spinner w-12 h-12 mr-4" />
+              <span className="text-text-tertiary font-semibold">Analyzing data...</span>
             </div>
           ) : insights.length === 0 ? (
             <div className="text-center py-12">
-              <SparklesIcon className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
-              <p className="text-neutral-500 font-semibold">No insights available yet</p>
-              <p className="text-neutral-400 text-sm mt-2">
+              <SparklesIcon className="w-16 h-16 text-text-muted opacity-50 mx-auto mb-4" />
+              <p className="text-text-secondary font-semibold">No insights available yet</p>
+              <p className="text-text-muted text-sm mt-2">
                 AI will analyze your data and generate insights automatically
               </p>
             </div>
           ) : (
             <div className="space-y-4">
-              {insights.map((insight) => (
+              {insights.map((insight, index) => (
                 <div
                   key={insight.id}
-                  className="group bg-gradient-to-r from-white to-neutral-50 rounded-xl p-6 border border-neutral-200 hover:shadow-xl hover:scale-102 transition-all duration-300"
+                  className="opacity-0 animate-fade-in-up"
+                  style={{ animationDelay: `${index * 100}ms`, animationFillMode: 'forwards' }}
                 >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className={`w-3 h-3 rounded-full bg-gradient-to-r ${getInsightColor(insight.type)}`}></div>
-                        <h3 className="text-lg font-bold text-neutral-800 group-hover:text-primary transition-colors">
-                          {insight.title}
-                        </h3>
-                        <span className={`text-xs px-3 py-1 rounded-full font-bold border ${getImpactBadge(insight.impact)}`}>
-                          {insight.impact.toUpperCase()} IMPACT
-                        </span>
-                      </div>
-                      <p className="text-neutral-600 leading-relaxed">
-                        {insight.description}
-                      </p>
-                      {insight.metric && (
-                        <div className="flex items-center gap-4 mt-4">
-                          <div className="text-sm font-semibold text-neutral-500">
-                            📊 {insight.metric}
+                  <PremiumCard hover>
+                    <div className="p-6">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-3">
+                            <div className={`w-3 h-3 rounded-full bg-gradient-to-r ${getInsightColor(insight.type)}`}></div>
+                            <h3 className="text-lg font-bold text-text-primary">
+                              {insight.title}
+                            </h3>
+                            <Badge color={insight.impact === 'high' ? 'rose' : insight.impact === 'medium' ? 'amber' : 'emerald'}>
+                              {insight.impact.toUpperCase()} IMPACT
+                            </Badge>
                           </div>
-                          {insight.change && (
-                            <div className={`flex items-center gap-1 text-sm font-bold ${insight.change > 0 ? 'text-green-600' : 'text-red-600'
-                              }`}>
-                              {insight.change > 0 ? (
-                                <ArrowTrendingUpIcon className="w-4 h-4" />
-                              ) : (
-                                <ArrowTrendingDownIcon className="w-4 h-4" />
+                          <p className="text-text-tertiary leading-relaxed">
+                            {insight.description}
+                          </p>
+                          {insight.metric && (
+                            <div className="flex items-center gap-4 mt-4">
+                              <div className="text-sm font-semibold text-text-muted">
+                                📊 {insight.metric}
+                              </div>
+                              {insight.change && (
+                                <div className={`flex items-center gap-1 text-sm font-bold ${insight.change > 0 ? 'text-success' : 'text-danger'
+                                  }`}>
+                                  {insight.change > 0 ? (
+                                    <ArrowTrendingUpIcon className="w-4 h-4" />
+                                  ) : (
+                                    <ArrowTrendingDownIcon className="w-4 h-4" />
+                                  )}
+                                  {Math.abs(insight.change)}%
+                                </div>
                               )}
-                              {Math.abs(insight.change)}%
                             </div>
                           )}
                         </div>
-                      )}
+                      </div>
                     </div>
-                  </div>
+                  </PremiumCard>
                 </div>
               ))}
             </div>
           )}
         </div>
-      </div>
+      </PremiumCard>
 
       {/* Info Banner */}
-      <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-6 border border-indigo-200">
+      <PremiumCard delay={500}>
         <div className="flex items-start gap-4">
-          <SparklesIcon className="w-6 h-6 text-indigo-600 flex-shrink-0 mt-1" />
+          <SparklesIcon className="w-6 h-6 text-primary-400 flex-shrink-0 mt-1" />
           <div>
-            <h3 className="font-bold text-indigo-900 mb-2">How AI Insights Work</h3>
-            <p className="text-indigo-700 text-sm leading-relaxed">
+            <h3 className="font-bold text-text-primary mb-2">How AI Insights Work</h3>
+            <p className="text-text-tertiary text-sm leading-relaxed">
               Our AI engine continuously analyzes your sales patterns, inventory levels, customer behavior, and market trends
               to generate actionable insights. These recommendations help you make data-driven decisions to grow your business.
             </p>
           </div>
         </div>
-      </div>
+      </PremiumCard>
     </div>
   )
 }

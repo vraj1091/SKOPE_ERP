@@ -1,9 +1,18 @@
 import { useState } from 'react'
 import api from '../utils/api'
 import toast from 'react-hot-toast'
-import { DocumentArrowDownIcon } from '@heroicons/react/24/outline'
+import {
+  DocumentArrowDownIcon,
+  DocumentTextIcon,
+  CalendarDaysIcon,
+  Cog6ToothIcon,
+  CheckIcon,
+  ChartBarIcon,
+  LightBulbIcon
+} from '@heroicons/react/24/outline'
 import StoreSelector from '../components/StoreSelector'
 import { useAuthStore } from '../store/authStore'
+import { PageHeader, PremiumCard, Button, Badge } from '../components/PremiumUI'
 
 export default function Reports() {
   const { user } = useAuthStore()
@@ -14,8 +23,6 @@ export default function Reports() {
     startDate: new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString().split('T')[0],
     endDate: new Date().toISOString().split('T')[0]
   })
-  // Custom columns - to be implemented
-  // const [selectedColumns, setSelectedColumns] = useState<string[]>([])
   const [selectedStoreId, setSelectedStoreId] = useState<number | 'all'>(user?.role === 'super_admin' ? 'all' : (user?.store_id || 'all'))
 
   const downloadReport = async (reportType: string, endpoint: string) => {
@@ -36,7 +43,6 @@ export default function Reports() {
         params
       })
 
-      // Try to get filename from Content-Disposition header
       let filename = `${reportType}_${new Date().toISOString().split('T')[0]}.xlsx`
       const contentDisposition = response.headers['content-disposition']
       if (contentDisposition) {
@@ -46,7 +52,6 @@ export default function Reports() {
         }
       }
 
-      // Create blob and download
       const url = window.URL.createObjectURL(new Blob([response.data]))
       const link = document.createElement('a')
       link.href = url
@@ -61,15 +66,12 @@ export default function Reports() {
       console.error('Download error:', error)
       let errorMessage = 'Failed to download report'
       if (error.response?.data) {
-        // For blob errors, we might need to read the blob
         if (error.response.data instanceof Blob) {
           try {
             const text = await error.response.data.text()
             const errorData = JSON.parse(text)
             errorMessage = errorData.detail || errorMessage
-          } catch (e) {
-            // Couldn't parse error, use default
-          }
+          } catch (e) { }
         }
       }
       toast.error(errorMessage)
@@ -92,7 +94,7 @@ export default function Reports() {
       title: 'Sales Report',
       description: 'Download detailed sales transactions with custom columns',
       endpoint: '/reports/sales/excel',
-      color: 'from-blue-500 to-blue-600',
+      color: 'blue',
       icon: '📊',
     },
     {
@@ -100,7 +102,7 @@ export default function Reports() {
       title: 'Inventory Report',
       description: 'Current stock levels, product details, and valuations',
       endpoint: '/reports/inventory/excel',
-      color: 'from-purple-500 to-purple-600',
+      color: 'violet',
       icon: '📦',
     },
     {
@@ -108,7 +110,7 @@ export default function Reports() {
       title: 'Customer Report',
       description: 'Customer database with purchase history and analytics',
       endpoint: '/reports/customers/excel',
-      color: 'from-green-500 to-green-600',
+      color: 'emerald',
       icon: '👥',
     },
     {
@@ -116,7 +118,7 @@ export default function Reports() {
       title: 'Expenses Report',
       description: 'Expense records with vouchers and financial details',
       endpoint: '/reports/expenses/excel',
-      color: 'from-red-500 to-red-600',
+      color: 'rose',
       icon: '💰',
     },
     {
@@ -124,7 +126,7 @@ export default function Reports() {
       title: 'Profit & Loss Statement',
       description: 'Comprehensive P&L report with revenue and expense breakdown',
       endpoint: '/reports/profit-loss/excel',
-      color: 'from-indigo-500 to-indigo-600',
+      color: 'cyan',
       icon: '📈',
     },
     {
@@ -132,155 +134,173 @@ export default function Reports() {
       title: 'GST/Tax Report',
       description: 'GST collected, paid, and tax compliance records',
       endpoint: '/reports/tax/excel',
-      color: 'from-yellow-500 to-yellow-600',
+      color: 'amber',
       icon: '📝',
     },
   ]
 
+  const getColorClasses = (color: string) => {
+    const colors: Record<string, { gradient: string; bg: string; border: string }> = {
+      blue: { gradient: 'from-blue-500 to-cyan-500', bg: 'bg-blue-500/10', border: 'border-blue-500/30' },
+      violet: { gradient: 'from-violet-500 to-purple-600', bg: 'bg-violet-500/10', border: 'border-violet-500/30' },
+      emerald: { gradient: 'from-emerald-500 to-green-500', bg: 'bg-emerald-500/10', border: 'border-emerald-500/30' },
+      rose: { gradient: 'from-rose-500 to-pink-500', bg: 'bg-rose-500/10', border: 'border-rose-500/30' },
+      cyan: { gradient: 'from-cyan-500 to-blue-500', bg: 'bg-cyan-500/10', border: 'border-cyan-500/30' },
+      amber: { gradient: 'from-amber-500 to-orange-500', bg: 'bg-amber-500/10', border: 'border-amber-500/30' },
+    }
+    return colors[color] || colors.violet
+  }
+
   return (
-    <div>
-      <div className="mb-8 flex justify-between items-center">
-        <div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            📊 Reports & Analytics
-          </h1>
-          <p className="text-neutral-600 mt-2 text-lg">
-            Generate and download comprehensive business reports with custom columns
-          </p>
-        </div>
-        <StoreSelector
-          selectedStoreId={selectedStoreId}
-          onStoreChange={setSelectedStoreId}
-          showAllOption={true}
-        />
-      </div>
+    <div className="space-y-8">
+      {/* Page Header */}
+      <PageHeader
+        title="Reports & Analytics"
+        subtitle="Generate and download comprehensive business reports"
+        icon={DocumentTextIcon}
+        actions={
+          <StoreSelector
+            selectedStoreId={selectedStoreId}
+            onStoreChange={setSelectedStoreId}
+            showAllOption={true}
+          />
+        }
+      />
 
       {/* Date Range & Options */}
-      <div className="card mb-8 bg-gradient-to-r from-primary/5 to-accent/5 border-2 border-primary/20">
-        <h3 className="text-lg font-bold text-primary mb-4 flex items-center gap-2">
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-          </svg>
-          Report Settings
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <PremiumCard delay={100}>
+        <div className="flex items-center gap-2 mb-4">
+          <CalendarDaysIcon className="w-5 h-5 text-violet-400" />
+          <h3 className="font-bold text-white">Report Settings</h3>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="label text-sm font-semibold">Start Date</label>
+            <label className="block text-sm font-medium text-gray-400 mb-2">Start Date</label>
             <input
               type="date"
               value={dateRange.startDate}
               onChange={(e) => setDateRange({ ...dateRange, startDate: e.target.value })}
-              className="input"
+              className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/20 transition-all"
             />
           </div>
           <div>
-            <label className="label text-sm font-semibold">End Date</label>
+            <label className="block text-sm font-medium text-gray-400 mb-2">End Date</label>
             <input
               type="date"
               value={dateRange.endDate}
               onChange={(e) => setDateRange({ ...dateRange, endDate: e.target.value })}
-              className="input"
+              className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/20 transition-all"
             />
           </div>
+          <div className="flex items-end">
+            <button
+              onClick={() => setShowCustomColumns(!showCustomColumns)}
+              className="w-full px-4 py-3 rounded-xl bg-violet-500/10 border border-violet-500/30 text-violet-400 hover:bg-violet-500/20 transition-all font-medium flex items-center justify-center gap-2"
+            >
+              <Cog6ToothIcon className="w-5 h-5" />
+              {showCustomColumns ? 'Custom Columns Active' : 'Customize Columns'}
+            </button>
+          </div>
         </div>
-        <div className="mt-4 flex items-center gap-3">
-          <button
-            onClick={() => setShowCustomColumns(!showCustomColumns)}
-            className="btn btn-outline text-sm"
-          >
-            {showCustomColumns ? '✓ Custom Columns Active' : '⚙️ Customize Columns'}
-          </button>
-          <span className="text-xs text-neutral-500">
+        <div className="mt-4">
+          <Badge color="cyan">
             Selected range: {Math.ceil((new Date(dateRange.endDate).getTime() - new Date(dateRange.startDate).getTime()) / (1000 * 60 * 60 * 24))} days
-          </span>
+          </Badge>
         </div>
-      </div>
+      </PremiumCard>
 
       {/* Reports Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {reports.map((report) => (
-          <div
-            key={report.id}
-            className="card hover:shadow-2xl transition-all hover:scale-105 border-2 border-transparent hover:border-primary/30"
-          >
-            <div className={`h-2 rounded-t-lg bg-gradient-to-r ${report.color} -mx-6 -mt-6 mb-4`} />
-            <div className="flex items-start gap-3 mb-4">
-              <div className={`text-4xl p-3 rounded-xl bg-gradient-to-br ${report.color} text-white shadow-lg`}>
-                {report.icon}
-              </div>
-              <div className="flex-1">
-                <h2 className="text-lg font-bold text-primary mb-1">
-                  {report.title}
-                </h2>
-                <p className="text-xs text-neutral-500 font-medium">
-                  {dateRange.startDate} to {dateRange.endDate}
-                </p>
-              </div>
-            </div>
-            <p className="text-sm text-neutral-600 mb-6 min-h-[40px]">{report.description}</p>
-
-            <button
-              onClick={() => downloadReport(report.id, report.endpoint)}
-              disabled={loading && selectedReport === report.id}
-              className={`btn w-full flex items-center justify-center disabled:opacity-50 bg-gradient-to-r ${report.color} text-white hover:shadow-xl transition-all`}
+        {reports.map((report, index) => {
+          const colors = getColorClasses(report.color)
+          return (
+            <div
+              key={report.id}
+              className="opacity-0 animate-fade-in-up"
+              style={{ animationDelay: `${200 + index * 100}ms`, animationFillMode: 'forwards' }}
             >
-              <DocumentArrowDownIcon className="w-5 h-5 mr-2" />
-              {loading && selectedReport === report.id
-                ? 'Generating...'
-                : 'Download Excel'}
-            </button>
-          </div>
-        ))}
+              <PremiumCard hover className="h-full relative overflow-hidden">
+                {/* Top Accent */}
+                <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${colors.gradient}`} />
+                
+                {/* Icon Background Glow */}
+                <div className={`absolute top-6 left-6 w-20 h-20 bg-gradient-to-br ${colors.gradient} opacity-20 blur-2xl rounded-full`} />
+
+                <div className="p-6 relative">
+                  <div className="flex items-start gap-4 mb-4">
+                    <div className={`text-4xl p-4 rounded-2xl bg-gradient-to-br ${colors.gradient} shadow-xl relative z-10`}>
+                      {report.icon}
+                    </div>
+                    <div className="flex-1">
+                      <h2 className="text-xl font-bold text-text-primary mb-1">{report.title}</h2>
+                      <p className="text-xs text-text-muted font-medium">
+                        {dateRange.startDate} to {dateRange.endDate}
+                      </p>
+                    </div>
+                  </div>
+                  <p className="text-sm text-text-tertiary mb-6 min-h-[48px] leading-relaxed">{report.description}</p>
+
+                  <Button
+                    onClick={() => downloadReport(report.id, report.endpoint)}
+                    disabled={loading && selectedReport === report.id}
+                    className="w-full"
+                    icon={DocumentArrowDownIcon}
+                  >
+                    {loading && selectedReport === report.id ? (
+                      <span className="flex items-center gap-2">
+                        <div className="spinner w-4 h-4" />
+                        Generating...
+                      </span>
+                    ) : (
+                      'Download Excel'
+                    )}
+                  </Button>
+                </div>
+              </PremiumCard>
+            </div>
+          )
+        })}
       </div>
 
       {/* Daily Closing Report */}
-      <div className="card mt-8">
-        <h2 className="text-xl font-bold text-primary mb-4">
-          Daily Closing Report
-        </h2>
-        <p className="text-neutral-600 mb-6">
-          Generate a comprehensive daily closing report with sales, expenses, and cash reconciliation
-        </p>
-
+      <PremiumCard title="Daily Closing Report" subtitle="Generate a comprehensive daily closing report" delay={800}>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="label">Select Date</label>
+            <label className="block text-sm font-medium text-gray-400 mb-2">Select Date</label>
             <input
               type="date"
-              className="input"
+              className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/20 transition-all"
               defaultValue={new Date().toISOString().split('T')[0]}
             />
           </div>
           <div className="flex items-end">
-            <button className="btn btn-primary w-full">
-              Generate Report
-            </button>
+            <Button className="w-full">Generate Report</Button>
           </div>
         </div>
-      </div>
+      </PremiumCard>
 
       {/* Custom Columns Section */}
       {showCustomColumns && (
-        <div className="card mt-8 bg-gradient-to-r from-purple-50 to-blue-50 border-2 border-purple-300">
-          <h3 className="text-xl font-bold text-purple-800 mb-4 flex items-center gap-2">
-            <span>⚙️</span>
-            Customize Report Columns
-          </h3>
-          <p className="text-sm text-purple-700 mb-4">
+        <PremiumCard delay={900}>
+          <div className="flex items-center gap-2 mb-4">
+            <Cog6ToothIcon className="w-5 h-5 text-violet-400" />
+            <h3 className="font-bold text-white">Customize Report Columns</h3>
+          </div>
+          <p className="text-sm text-gray-400 mb-6">
             Select which columns you want in your reports. This will be saved for future exports.
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {Object.entries(availableColumns).map(([reportType, columns]) => (
-              <div key={reportType} className="bg-white rounded-xl p-4 shadow-md">
-                <h4 className="font-bold text-gray-800 mb-3 capitalize flex items-center gap-2">
+              <div key={reportType} className="bg-white/5 rounded-xl p-4 border border-white/10">
+                <h4 className="font-bold text-white mb-3 capitalize flex items-center gap-2">
                   {reports.find(r => r.id === reportType)?.icon}
                   {reportType} Columns
                 </h4>
                 <div className="space-y-2">
                   {columns.map((col) => (
-                    <label key={col} className="flex items-center gap-2 text-sm hover:bg-gray-50 p-2 rounded cursor-pointer">
-                      <input type="checkbox" className="rounded text-primary" defaultChecked />
+                    <label key={col} className="flex items-center gap-2 text-sm text-gray-400 hover:bg-white/5 p-2 rounded cursor-pointer">
+                      <input type="checkbox" className="rounded accent-violet-500" defaultChecked />
                       <span>{col}</span>
                     </label>
                   ))}
@@ -290,76 +310,57 @@ export default function Reports() {
           </div>
 
           <div className="mt-6 flex gap-3">
-            <button className="btn btn-primary">
-              💾 Save Column Preferences
-            </button>
-            <button
-              className="btn btn-outline"
-              onClick={() => setShowCustomColumns(false)}
-            >
+            <Button>💾 Save Column Preferences</Button>
+            <Button variant="secondary" onClick={() => setShowCustomColumns(false)}>
               Cancel
-            </button>
+            </Button>
           </div>
-        </div>
+        </PremiumCard>
       )}
 
       {/* Report Information */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-        <div className="card bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-300">
-          <h3 className="font-bold text-blue-900 mb-3 flex items-center gap-2 text-lg">
-            <span>📋</span>
-            Report Features
-          </h3>
-          <ul className="text-sm text-blue-800 space-y-2">
-            <li className="flex items-center gap-2">
-              <span className="text-green-600">✓</span>
-              All reports in Excel format (.xlsx)
-            </li>
-            <li className="flex items-center gap-2">
-              <span className="text-green-600">✓</span>
-              Custom date range selection
-            </li>
-            <li className="flex items-center gap-2">
-              <span className="text-green-600">✓</span>
-              Customizable columns
-            </li>
-            <li className="flex items-center gap-2">
-              <span className="text-green-600">✓</span>
-              Historical data access
-            </li>
-            <li className="flex items-center gap-2">
-              <span className="text-green-600">✓</span>
-              GST/Tax compliance ready
-            </li>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <PremiumCard delay={1000}>
+          <div className="flex items-center gap-2 mb-4">
+            <ChartBarIcon className="w-5 h-5 text-blue-400" />
+            <h3 className="font-bold text-white">Report Features</h3>
+          </div>
+          <ul className="text-sm text-gray-400 space-y-3">
+            {[
+              'All reports in Excel format (.xlsx)',
+              'Custom date range selection',
+              'Customizable columns',
+              'Historical data access',
+              'GST/Tax compliance ready'
+            ].map((feature, i) => (
+              <li key={i} className="flex items-center gap-2">
+                <CheckIcon className="w-4 h-4 text-emerald-400" />
+                <span>{feature}</span>
+              </li>
+            ))}
           </ul>
-        </div>
+        </PremiumCard>
 
-        <div className="card bg-gradient-to-br from-purple-50 to-purple-100 border-2 border-purple-300">
-          <h3 className="font-bold text-purple-900 mb-3 flex items-center gap-2 text-lg">
-            <span>💡</span>
-            Pro Tips
-          </h3>
-          <ul className="text-sm text-purple-800 space-y-2">
-            <li className="flex items-start gap-2">
-              <span>→</span>
-              <span>Use custom date ranges for month-over-month comparison</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span>→</span>
-              <span>Download expense reports with vouchers for audits</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span>→</span>
-              <span>Generate P&L statements for financial analysis</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span>→</span>
-              <span>Export customer data for marketing campaigns</span>
-            </li>
+        <PremiumCard delay={1100}>
+          <div className="flex items-center gap-2 mb-4">
+            <LightBulbIcon className="w-5 h-5 text-amber-400" />
+            <h3 className="font-bold text-white">Pro Tips</h3>
+          </div>
+          <ul className="text-sm text-gray-400 space-y-3">
+            {[
+              'Use custom date ranges for month-over-month comparison',
+              'Download expense reports with vouchers for audits',
+              'Generate P&L statements for financial analysis',
+              'Export customer data for marketing campaigns'
+            ].map((tip, i) => (
+              <li key={i} className="flex items-start gap-2">
+                <span className="text-violet-400">→</span>
+                <span>{tip}</span>
+              </li>
+            ))}
           </ul>
-        </div>
+        </PremiumCard>
       </div>
     </div>
   )
 }
-

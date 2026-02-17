@@ -162,12 +162,70 @@ def sync_google_ads_campaigns(
             detail="Google Ads integration not found"
         )
     
-    # TODO: Implement Google Ads API sync
+    # SIMULATION: Create mock synced campaigns for demonstration
+    mock_campaigns = [
+        {
+            "external_campaign_id": f"GOOG-{datetime.now().strftime('%M%S')}-1",
+            "campaign_name": "Summer Sale Search - " + datetime.now().strftime("%B"),
+            "status": "active",
+            "impressions": 15420,
+            "clicks": 845,
+            "conversions": 124,
+            "spend": 450.50,
+            "ctr": 5.48,
+            "cpc": 0.53,
+            "roas": 4.2
+        },
+        {
+            "external_campaign_id": f"GOOG-{datetime.now().strftime('%M%S')}-2",
+            "campaign_name": "Brand Awareness Display",
+            "status": "active",
+            "impressions": 45000,
+            "clicks": 120,
+            "conversions": 15,
+            "spend": 150.00,
+            "ctr": 0.27,
+            "cpc": 1.25,
+            "roas": 1.5
+        }
+    ]
+
+    count = 0
+    for mock in mock_campaigns:
+        # Check if exists
+        exists = db.query(models.MarketingCampaignSync).filter(
+            models.MarketingCampaignSync.integration_id == integration_id,
+            models.MarketingCampaignSync.external_campaign_id == mock["external_campaign_id"]
+        ).first()
+
+        if not exists:
+            sync_record = models.MarketingCampaignSync(
+                integration_id=integration_id,
+                platform="google_ads",
+                external_campaign_id=mock["external_campaign_id"],
+                campaign_name=mock["campaign_name"],
+                status=mock["status"],
+                impressions=mock["impressions"],
+                clicks=mock["clicks"],
+                conversions=mock["conversions"],
+                spend=mock["spend"],
+                ctr=mock["ctr"],
+                cpc=mock["cpc"],
+                roas=mock["roas"],
+                last_synced_at=datetime.utcnow()
+            )
+            db.add(sync_record)
+            count += 1
+    
+    # Update integration last synced time
+    integration.last_sync_at = datetime.utcnow()
+    db.commit()
+
     return {
         "success": True,
-        "message": "Google Ads sync initiated",
-        "campaigns_synced": 0,
-        "note": "Production requires: Google Ads API client library, active campaigns"
+        "message": "Google Ads sync completed",
+        "campaigns_synced": count,
+        "note": "Simulated data for demonstration"
     }
 
 @router.post("/sync/meta-ads/{integration_id}")
@@ -194,12 +252,68 @@ def sync_meta_ads_campaigns(
             detail="Meta Ads integration not found"
         )
     
-    # TODO: Implement Meta Marketing API sync
+    # SIMULATION: Create mock synced campaigns for Meta
+    mock_campaigns = [
+        {
+            "external_campaign_id": f"META-{datetime.now().strftime('%M%S')}-1",
+            "campaign_name": "Instagram Story Retargeting",
+            "status": "active",
+            "impressions": 85000,
+            "clicks": 1560,
+            "conversions": 89,
+            "spend": 850.00,
+            "ctr": 1.83,
+            "cpc": 0.54,
+            "roas": 3.5
+        },
+        {
+            "external_campaign_id": f"META-{datetime.now().strftime('%M%S')}-2",
+            "campaign_name": "Facebook Feed Prospection",
+            "status": "active",
+            "impressions": 120500,
+            "clicks": 3400,
+            "conversions": 150,
+            "spend": 1200.00,
+            "ctr": 2.82,
+            "cpc": 0.35,
+            "roas": 2.8
+        }
+    ]
+
+    count = 0
+    for mock in mock_campaigns:
+        exists = db.query(models.MarketingCampaignSync).filter(
+            models.MarketingCampaignSync.integration_id == integration_id,
+            models.MarketingCampaignSync.external_campaign_id == mock["external_campaign_id"]
+        ).first()
+
+        if not exists:
+            sync_record = models.MarketingCampaignSync(
+                integration_id=integration_id,
+                platform="meta_ads",
+                external_campaign_id=mock["external_campaign_id"],
+                campaign_name=mock["campaign_name"],
+                status=mock["status"],
+                impressions=mock["impressions"],
+                clicks=mock["clicks"],
+                conversions=mock["conversions"],
+                spend=mock["spend"],
+                ctr=mock["ctr"],
+                cpc=mock["cpc"],
+                roas=mock["roas"],
+                last_synced_at=datetime.utcnow()
+            )
+            db.add(sync_record)
+            count += 1
+            
+    integration.last_sync_at = datetime.utcnow()
+    db.commit()
+
     return {
         "success": True,
-        "message": "Meta Ads sync initiated",
-        "campaigns_synced": 0,
-        "note": "Production requires: Facebook Marketing API, Business Manager access"
+        "message": "Meta Ads sync completed",
+        "campaigns_synced": count,
+        "note": "Simulated data for demonstration"
     }
 
 @router.get("/campaigns/synced", response_model=List[MarketingCampaignSyncResponse])

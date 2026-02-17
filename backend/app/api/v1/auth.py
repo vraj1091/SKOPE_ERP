@@ -13,46 +13,56 @@ router = APIRouter()
 
 @router.post("/login", response_model=Token)
 def login(user_credentials: UserLogin, db: Session = Depends(get_db)):
-    # Check if logging in with username or email
-    user = db.query(models.User).filter(
-        (models.User.username == user_credentials.username) |
-        (models.User.email == user_credentials.username)
-    ).first()
-    
-    if not user or not verify_password(user_credentials.password, user.hashed_password):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password"
+    try:
+        # Check if logging in with username or email
+        print(f"Login attempt for: {user_credentials.username}")
+        user = db.query(models.User).filter(
+            (models.User.username == user_credentials.username) |
+            (models.User.email == user_credentials.username)
+        ).first()
+        
+        if not user:
+             print("User not found")
+        else:
+             print(f"User found: {user.id}")
+
+        if not user or not verify_password(user_credentials.password, user.hashed_password):
+            print("Verification failed")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Incorrect username or password"
+            )
+        
+        if not user.is_active:
+            print("User inactive")
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="User account is inactive"
+            )
+        
+        access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token = create_access_token(
+            data={"sub": str(user.id)},
+            expires_delta=access_token_expires
         )
-    
-    if not user.is_active:
+        print("Token created")
+        
+        return {
+            "access_token": access_token,
+            "token_type": "bearer",
+            "user": UserResponse.model_validate(user)
+        }
+    except HTTPException as he:
+        # Re-raise HTTP exceptions (like 401, 403) directly
+        raise he
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        print(f"Login Error: {e}")
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="User account is inactive"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Login failed: {str(e)}"
         )
-    
-    # Create audit log
-    audit_log = models.AuditLog(
-        user_id=user.id,
-        action="login",
-        entity_type="user",
-        entity_id=user.id,
-        details=json.dumps({"username": user.username})
-    )
-    db.add(audit_log)
-    db.commit()
-    
-    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={"sub": str(user.id)},
-        expires_delta=access_token_expires
-    )
-    
-    return {
-        "access_token": access_token,
-        "token_type": "bearer",
-        "user": UserResponse.model_validate(user)
-    }
 
 @router.post("/change-password")
 def change_password(

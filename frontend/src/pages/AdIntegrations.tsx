@@ -12,6 +12,11 @@ import {
   PhotoIcon,
   MegaphoneIcon
 } from '@heroicons/react/24/outline'
+import {
+  TiltCard,
+  HolographicCard,
+  CyberButton
+} from '../components/NextGenUI'
 
 interface AdConnection {
   id: number
@@ -135,71 +140,81 @@ export default function AdIntegrations() {
       {/* Overview Stats */}
       {overview && (
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-          <div className="bg-white rounded-xl shadow-lg p-6 border border-neutral-200">
-            <div className="flex items-center gap-3">
-              <div className="p-3 bg-blue-100 rounded-lg">
-                <MegaphoneIcon className="w-6 h-6 text-blue-600" />
-              </div>
-              <div>
-                <div className="text-sm text-neutral-500">Active Campaigns</div>
-                <div className="text-2xl font-bold">{overview.active_campaigns}</div>
-              </div>
-            </div>
-          </div>
-          <div className="bg-white rounded-xl shadow-lg p-6 border border-neutral-200">
-            <div className="flex items-center gap-3">
-              <div className="p-3 bg-green-100 rounded-lg">
-                <ChartBarIcon className="w-6 h-6 text-green-600" />
-              </div>
-              <div>
-                <div className="text-sm text-neutral-500">Total Spend</div>
-                <div className="text-2xl font-bold">₹{formatNumber(overview.total_spend)}</div>
+          <TiltCard glowColor="blue">
+            <div className="p-6 rounded-2xl bg-white/5 border border-white/10 h-full">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-blue-500/20 rounded-lg text-blue-400">
+                  <MegaphoneIcon className="w-6 h-6" />
+                </div>
+                <div>
+                  <div className="text-sm text-gray-400">Active Campaigns</div>
+                  <div className="text-2xl font-bold text-white">{overview.active_campaigns}</div>
+                </div>
               </div>
             </div>
-          </div>
-          <div className="bg-white rounded-xl shadow-lg p-6 border border-neutral-200">
-            <div className="flex items-center gap-3">
-              <div className="p-3 bg-purple-100 rounded-lg">
-                <UsersIcon className="w-6 h-6 text-purple-600" />
-              </div>
-              <div>
-                <div className="text-sm text-neutral-500">Total Clicks</div>
-                <div className="text-2xl font-bold">{formatNumber(overview.total_clicks)}</div>
-              </div>
-            </div>
-          </div>
-          <div className="bg-white rounded-xl shadow-lg p-6 border border-neutral-200">
-            <div className="flex items-center gap-3">
-              <div className="p-3 bg-orange-100 rounded-lg">
-                <UsersIcon className="w-6 h-6 text-orange-600" />
-              </div>
-              <div>
-                <div className="text-sm text-neutral-500">Total Leads</div>
-                <div className="text-2xl font-bold">{formatNumber(overview.total_leads)}</div>
+          </TiltCard>
+          <TiltCard glowColor="emerald">
+            <div className="p-6 rounded-2xl bg-white/5 border border-white/10 h-full">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-emerald-500/20 rounded-lg text-emerald-400">
+                  <ChartBarIcon className="w-6 h-6" />
+                </div>
+                <div>
+                  <div className="text-sm text-gray-400">Total Spend</div>
+                  <div className="text-2xl font-bold text-white">₹{formatNumber(overview.total_spend)}</div>
+                </div>
               </div>
             </div>
-          </div>
-          <div className="bg-white rounded-xl shadow-lg p-6 border border-neutral-200">
-            <div className="flex items-center gap-3">
-              <div className="p-3 bg-pink-100 rounded-lg">
-                <ChartBarIcon className="w-6 h-6 text-pink-600" />
-              </div>
-              <div>
-                <div className="text-sm text-neutral-500">ROAS</div>
-                <div className="text-2xl font-bold">{overview.roas}x</div>
+          </TiltCard>
+          <TiltCard glowColor="purple">
+            <div className="p-6 rounded-2xl bg-white/5 border border-white/10 h-full">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-purple-500/20 rounded-lg text-purple-400">
+                  <UsersIcon className="w-6 h-6" />
+                </div>
+                <div>
+                  <div className="text-sm text-gray-400">Total Clicks</div>
+                  <div className="text-2xl font-bold text-white">{formatNumber(overview.total_clicks)}</div>
+                </div>
               </div>
             </div>
-          </div>
+          </TiltCard>
+          <TiltCard glowColor="amber">
+            <div className="p-6 rounded-2xl bg-white/5 border border-white/10 h-full">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-amber-500/20 rounded-lg text-amber-400">
+                  <UsersIcon className="w-6 h-6" />
+                </div>
+                <div>
+                  <div className="text-sm text-gray-400">Total Leads</div>
+                  <div className="text-2xl font-bold text-white">{formatNumber(overview.total_leads)}</div>
+                </div>
+              </div>
+            </div>
+          </TiltCard>
+          <TiltCard glowColor="rose">
+            <div className="p-6 rounded-2xl bg-white/5 border border-white/10 h-full">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-rose-500/20 rounded-lg text-rose-400">
+                  <ChartBarIcon className="w-6 h-6" />
+                </div>
+                <div>
+                  <div className="text-sm text-gray-400">ROAS</div>
+                  <div className="text-2xl font-bold text-white">{overview.roas}x</div>
+                </div>
+              </div>
+            </div>
+          </TiltCard>
         </div>
       )}
 
       {/* Platform Connections */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Meta (Facebook/Instagram) */}
-        <div className="bg-white rounded-2xl shadow-lg border border-neutral-200 overflow-hidden">
-          <div className="bg-gradient-to-r from-blue-500 to-blue-700 p-6 text-white">
+        <HolographicCard className="overflow-hidden p-0">
+          <div className="bg-gradient-to-r from-blue-600/80 to-blue-800/80 p-6 text-white border-b border-white/10">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-white rounded-xl flex items-center justify-center">
+              <div className="w-16 h-16 bg-white rounded-xl flex items-center justify-center shadow-lg">
                 <svg className="w-10 h-10" viewBox="0 0 24 24" fill="#1877F2">
                   <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
                 </svg>
@@ -210,64 +225,66 @@ export default function AdIntegrations() {
               </div>
             </div>
           </div>
-          <div className="p-6">
+          <div className="p-6 bg-white/5 backdrop-blur-md">
             {getMetaConnection() ? (
               <div className="space-y-4">
-                <div className="flex items-center gap-2 text-green-600">
+                <div className="flex items-center gap-2 text-emerald-400">
                   <CheckCircleIcon className="w-6 h-6" />
                   <span className="font-semibold">Connected</span>
                 </div>
-                <div className="bg-neutral-50 rounded-lg p-4 space-y-2">
+                <div className="bg-white/5 rounded-lg p-4 space-y-2 border border-white/10">
                   <div className="flex justify-between">
-                    <span className="text-neutral-500">Ad Account ID</span>
-                    <span className="font-mono">{getMetaConnection()?.meta_ad_account_id}</span>
+                    <span className="text-gray-400">Ad Account ID</span>
+                    <span className="font-mono text-white">{getMetaConnection()?.meta_ad_account_id}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-neutral-500">Status</span>
-                    <span className="text-green-600 font-semibold">Active</span>
+                    <span className="text-gray-400">Status</span>
+                    <span className="text-emerald-400 font-semibold">Active</span>
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <button
+                  <CyberButton
                     onClick={() => navigate('/marketing')}
-                    className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition"
+                    className="flex-1"
+                    variant="primary"
                   >
                     View Campaigns
-                  </button>
-                  <button
+                  </CyberButton>
+                  <CyberButton
                     onClick={loadData}
-                    className="p-2 border border-neutral-300 rounded-lg hover:bg-neutral-50 transition"
+                    variant="secondary"
+                    className="px-3"
                   >
                     <ArrowPathIcon className="w-5 h-5" />
-                  </button>
+                  </CyberButton>
                 </div>
               </div>
             ) : (
               <div className="space-y-4">
-                <div className="flex items-center gap-2 text-neutral-500">
+                <div className="flex items-center gap-2 text-gray-400">
                   <ExclamationTriangleIcon className="w-6 h-6" />
                   <span>Not Connected</span>
                 </div>
-                <p className="text-sm text-neutral-600">
+                <p className="text-sm text-gray-400">
                   Connect your Meta Business account to create and manage Facebook, Instagram, and WhatsApp ads directly from SKOPE ERP.
                 </p>
-                <button
+                <CyberButton
                   onClick={handleConnectMeta}
-                  className="w-full bg-blue-600 text-white px-4 py-3 rounded-lg font-semibold hover:bg-blue-700 transition flex items-center justify-center gap-2"
+                  className="w-full"
+                  icon={LinkIcon}
                 >
-                  <LinkIcon className="w-5 h-5" />
                   Connect Meta Business
-                </button>
+                </CyberButton>
               </div>
             )}
           </div>
-        </div>
+        </HolographicCard>
 
         {/* Google Ads */}
-        <div className="bg-white rounded-2xl shadow-lg border border-neutral-200 overflow-hidden">
-          <div className="bg-gradient-to-r from-green-500 to-green-700 p-6 text-white">
+        <HolographicCard className="overflow-hidden p-0">
+          <div className="bg-gradient-to-r from-emerald-600/80 to-emerald-800/80 p-6 text-white border-b border-white/10">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-white rounded-xl flex items-center justify-center">
+              <div className="w-16 h-16 bg-white rounded-xl flex items-center justify-center shadow-lg">
                 <svg className="w-10 h-10" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
                   <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
@@ -281,95 +298,98 @@ export default function AdIntegrations() {
               </div>
             </div>
           </div>
-          <div className="p-6">
+          <div className="p-6 bg-white/5 backdrop-blur-md">
             {getGoogleConnection() ? (
               <div className="space-y-4">
-                <div className="flex items-center gap-2 text-green-600">
+                <div className="flex items-center gap-2 text-emerald-400">
                   <CheckCircleIcon className="w-6 h-6" />
                   <span className="font-semibold">Connected</span>
                 </div>
-                <div className="bg-neutral-50 rounded-lg p-4 space-y-2">
+                <div className="bg-white/5 rounded-lg p-4 space-y-2 border border-white/10">
                   <div className="flex justify-between">
-                    <span className="text-neutral-500">Customer ID</span>
-                    <span className="font-mono">{getGoogleConnection()?.google_customer_id}</span>
+                    <span className="text-gray-400">Customer ID</span>
+                    <span className="font-mono text-white">{getGoogleConnection()?.google_customer_id}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-neutral-500">Status</span>
-                    <span className="text-green-600 font-semibold">Active</span>
+                    <span className="text-gray-400">Status</span>
+                    <span className="text-emerald-400 font-semibold">Active</span>
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <button
+                  <CyberButton
                     onClick={() => navigate('/marketing')}
-                    className="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition"
+                    className="flex-1"
+                    variant="primary"
                   >
                     View Campaigns
-                  </button>
-                  <button
+                  </CyberButton>
+                  <CyberButton
                     onClick={loadData}
-                    className="p-2 border border-neutral-300 rounded-lg hover:bg-neutral-50 transition"
+                    variant="secondary"
+                    className="px-3"
                   >
                     <ArrowPathIcon className="w-5 h-5" />
-                  </button>
+                  </CyberButton>
                 </div>
               </div>
             ) : (
               <div className="space-y-4">
-                <div className="flex items-center gap-2 text-neutral-500">
+                <div className="flex items-center gap-2 text-gray-400">
                   <ExclamationTriangleIcon className="w-6 h-6" />
                   <span>Not Connected</span>
                 </div>
-                <p className="text-sm text-neutral-600">
+                <p className="text-sm text-gray-400">
                   Connect your Google Ads account to run search, display, and YouTube campaigns targeting local customers.
                 </p>
-                <button
+                <CyberButton
                   onClick={handleConnectGoogle}
-                  className="w-full bg-green-600 text-white px-4 py-3 rounded-lg font-semibold hover:bg-green-700 transition flex items-center justify-center gap-2"
+                  className="w-full"
+                  variant="primary" // Consider a green variant if available, but primary is violet
+                  icon={LinkIcon}
                 >
-                  <LinkIcon className="w-5 h-5" />
                   Connect Google Ads
-                </button>
+                </CyberButton>
               </div>
             )}
           </div>
-        </div>
+        </HolographicCard>
       </div>
 
       {/* Active Campaigns */}
-      <div className="bg-white rounded-2xl shadow-lg border border-neutral-200 p-6">
+      <div className="bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 p-6">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold">Active Campaigns</h2>
+          <h2 className="text-xl font-bold text-white">Active Campaigns</h2>
           <button
             onClick={() => navigate('/marketing')}
-            className="text-primary font-semibold hover:underline"
+            className="text-purple-400 font-semibold hover:text-purple-300 transition"
           >
             View All →
           </button>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-neutral-50">
+          <table className="w-full text-left">
+            <thead className="bg-white/5 text-gray-400">
               <tr>
-                <th className="text-left py-3 px-4 font-semibold text-neutral-600">Campaign</th>
-                <th className="text-left py-3 px-4 font-semibold text-neutral-600">Platform</th>
-                <th className="text-left py-3 px-4 font-semibold text-neutral-600">Status</th>
-                <th className="text-left py-3 px-4 font-semibold text-neutral-600">Daily Budget</th>
+                <th className="py-3 px-4 font-semibold">Campaign</th>
+                <th className="py-3 px-4 font-semibold">Platform</th>
+                <th className="py-3 px-4 font-semibold">Status</th>
+                <th className="py-3 px-4 font-semibold">Daily Budget</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-white/5 text-gray-300">
               {campaigns.slice(0, 5).map((campaign) => (
-                <tr key={campaign.id} className="border-t border-neutral-100 hover:bg-neutral-50">
-                  <td className="py-3 px-4 font-medium">{campaign.campaign_name}</td>
+                <tr key={campaign.id} className="hover:bg-white/5 transition">
+                  <td className="py-3 px-4 font-medium text-white">{campaign.campaign_name}</td>
                   <td className="py-3 px-4">
-                    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${campaign.platform === 'meta' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'
+                    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${campaign.platform === 'meta' ? 'bg-blue-500/20 text-blue-400' : 'bg-emerald-500/20 text-emerald-400'
                       }`}>
                       {campaign.platform === 'meta' ? 'Meta' : 'Google'}
                     </span>
                   </td>
                   <td className="py-3 px-4">
-                    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${campaign.status === 'active' ? 'bg-green-100 text-green-700' :
-                      campaign.status === 'paused' ? 'bg-yellow-100 text-yellow-700' :
-                        'bg-neutral-100 text-neutral-700'
+                    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${campaign.status === 'active' ? 'bg-emerald-500/20 text-emerald-400' :
+                      campaign.status === 'paused' ? 'bg-amber-500/20 text-amber-400' :
+                        'bg-gray-500/20 text-gray-400'
                       }`}>
                       {campaign.status}
                     </span>
@@ -383,30 +403,30 @@ export default function AdIntegrations() {
       </div>
 
       {/* Custom Audiences */}
-      <div className="bg-white rounded-2xl shadow-lg border border-neutral-200 p-6">
+      <div className="bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 p-6">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold">Custom Audiences</h2>
-          <button className="bg-primary text-white px-4 py-2 rounded-lg font-semibold hover:bg-primary-dark transition">
-            + Create Audience
-          </button>
+          <h2 className="text-xl font-bold text-white">Custom Audiences</h2>
+          <CyberButton size="sm" icon={UsersIcon}>
+            Create Audience
+          </CyberButton>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {audiences.map((audience) => (
             <div
               key={audience.id}
-              className="bg-gradient-to-br from-neutral-50 to-neutral-100 rounded-xl p-4 border border-neutral-200"
+              className="bg-white/5 rounded-xl p-4 border border-white/10 hover:border-purple-500/30 transition"
             >
               <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 bg-purple-100 rounded-lg">
-                  <UsersIcon className="w-5 h-5 text-purple-600" />
+                <div className="p-2 bg-purple-500/20 rounded-lg text-purple-400">
+                  <UsersIcon className="w-5 h-5" />
                 </div>
-                <span className={`px-2 py-1 rounded-full text-xs font-semibold ${audience.platform === 'meta' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'
+                <span className={`px-2 py-1 rounded-full text-xs font-semibold ${audience.platform === 'meta' ? 'bg-blue-500/20 text-blue-400' : 'bg-emerald-500/20 text-emerald-400'
                   }`}>
                   {audience.platform}
                 </span>
               </div>
-              <h3 className="font-bold text-neutral-800">{audience.name}</h3>
-              <div className="mt-2 flex items-center justify-between text-sm text-neutral-500">
+              <h3 className="font-bold text-white">{audience.name}</h3>
+              <div className="mt-2 flex items-center justify-between text-sm text-gray-400">
                 <span>{audience.size.toLocaleString()} customers</span>
                 <span>Synced</span>
               </div>
@@ -417,29 +437,37 @@ export default function AdIntegrations() {
 
       {/* Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <button
-          onClick={() => navigate('/marketing')}
-          className="bg-white rounded-xl shadow-lg border border-neutral-200 p-6 hover:shadow-xl transition text-left"
-        >
-          <MegaphoneIcon className="w-8 h-8 text-primary mb-3" />
-          <h3 className="font-bold text-lg">Create Campaign</h3>
-          <p className="text-sm text-neutral-500">Launch a new ad campaign</p>
-        </button>
-        <button className="bg-white rounded-xl shadow-lg border border-neutral-200 p-6 hover:shadow-xl transition text-left">
-          <PhotoIcon className="w-8 h-8 text-primary mb-3" />
-          <h3 className="font-bold text-lg">Upload Creative</h3>
-          <p className="text-sm text-neutral-500">Add images and videos</p>
-        </button>
-        <button className="bg-white rounded-xl shadow-lg border border-neutral-200 p-6 hover:shadow-xl transition text-left">
-          <UsersIcon className="w-8 h-8 text-primary mb-3" />
-          <h3 className="font-bold text-lg">Build Audience</h3>
-          <p className="text-sm text-neutral-500">Create custom audiences</p>
-        </button>
-        <button className="bg-white rounded-xl shadow-lg border border-neutral-200 p-6 hover:shadow-xl transition text-left">
-          <ChartBarIcon className="w-8 h-8 text-primary mb-3" />
-          <h3 className="font-bold text-lg">View Analytics</h3>
-          <p className="text-sm text-neutral-500">Performance insights</p>
-        </button>
+        <TiltCard glowColor="violet">
+          <button
+            onClick={() => navigate('/marketing')}
+            className="w-full text-left p-6 h-full rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition"
+          >
+            <MegaphoneIcon className="w-8 h-8 text-purple-400 mb-3" />
+            <h3 className="font-bold text-lg text-white">Create Campaign</h3>
+            <p className="text-sm text-gray-400">Launch a new ad campaign</p>
+          </button>
+        </TiltCard>
+        <TiltCard glowColor="pink">
+          <button className="w-full text-left p-6 h-full rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition">
+            <PhotoIcon className="w-8 h-8 text-pink-400 mb-3" />
+            <h3 className="font-bold text-lg text-white">Upload Creative</h3>
+            <p className="text-sm text-gray-400">Add images and videos</p>
+          </button>
+        </TiltCard>
+        <TiltCard glowColor="amber">
+          <button className="w-full text-left p-6 h-full rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition">
+            <UsersIcon className="w-8 h-8 text-amber-400 mb-3" />
+            <h3 className="font-bold text-lg text-white">Build Audience</h3>
+            <p className="text-sm text-gray-400">Create custom audiences</p>
+          </button>
+        </TiltCard>
+        <TiltCard glowColor="cyan">
+          <button className="w-full text-left p-6 h-full rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition">
+            <ChartBarIcon className="w-8 h-8 text-cyan-400 mb-3" />
+            <h3 className="font-bold text-lg text-white">View Analytics</h3>
+            <p className="text-sm text-gray-400">Performance insights</p>
+          </button>
+        </TiltCard>
       </div>
     </div>
   )

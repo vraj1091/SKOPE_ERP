@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { ChartBarIcon, DocumentArrowDownIcon, CalendarIcon } from '@heroicons/react/24/outline'
 import toast from 'react-hot-toast'
 import api from '../utils/api'
+import { PageHeader, PremiumCard, Button, StatCard, Badge } from '../components/PremiumUI'
 
 interface ReportTemplate {
   id: string
@@ -392,24 +393,24 @@ export default function AdvancedReports() {
 
       return (
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="min-w-full divide-y divide-border">
+            <thead className="bg-surface-hover">
               <tr>
                 {columns.map((col) => (
                   <th
                     key={col}
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    className="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider"
                   >
                     {formatColumnName(col)}
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-surface divide-y divide-border">
               {dataArray.map((row, idx) => (
-                <tr key={idx} className="hover:bg-gray-50">
+                <tr key={idx} className="hover:bg-surface-hover transition-colors">
                   {columns.map((col) => (
-                    <td key={col} className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td key={col} className="px-6 py-4 whitespace-nowrap text-sm text-text-primary">
                       {isPercentColumn(col) && typeof row[col] === 'number'
                         ? `${Number(row[col]).toFixed(2)}%`
                         : isCurrencyColumn(col, row[col])
@@ -434,13 +435,13 @@ export default function AdvancedReports() {
 
           if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
             return (
-              <div key={key} className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                <h3 className="font-bold text-lg mb-3 capitalize text-gray-800">{key.replace(/_/g, ' ')}</h3>
+              <div key={key} className="bg-surface-hover p-4 rounded-lg border border-border">
+                <h3 className="font-bold text-lg mb-3 capitalize text-text-primary">{key.replace(/_/g, ' ')}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {Object.entries(value as Record<string, any>).map(([subKey, subValue]) => (
                     <div key={subKey} className="flex justify-between items-center">
-                      <span className="text-gray-600 capitalize text-sm">{subKey.replace(/_/g, ' ')}:</span>
-                      <span className="font-semibold text-gray-900">
+                      <span className="text-text-tertiary capitalize text-sm">{subKey.replace(/_/g, ' ')}:</span>
+                      <span className="font-semibold text-text-primary">
                         {typeof subValue === 'number' && (subKey.includes('amount') || subKey.includes('value') || subKey.includes('total'))
                           ? `₹${Number(subValue).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`
                           : String(subValue)}
@@ -452,9 +453,9 @@ export default function AdvancedReports() {
             )
           } else if (!Array.isArray(value) && value !== null) {
             return (
-              <div key={key} className="flex justify-between items-center p-4 bg-gray-50 rounded-lg border border-gray-200">
-                <span className="text-gray-600 capitalize font-medium">{key.replace(/_/g, ' ')}:</span>
-                <span className="font-bold text-gray-900">
+              <div key={key} className="flex justify-between items-center p-4 bg-surface-hover rounded-lg border border-border">
+                <span className="text-text-tertiary capitalize font-medium">{key.replace(/_/g, ' ')}:</span>
+                <span className="font-bold text-text-primary">
                   {typeof value === 'number' && (key.includes('amount') || key.includes('value') || key.includes('total') || key.includes('sales'))
                     ? `₹${Number(value).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`
                     : String(value)}
@@ -465,7 +466,7 @@ export default function AdvancedReports() {
           return null
         })}
         {Object.keys(reportData).filter(k => !['start_date', 'end_date', 'date'].includes(k)).length === 0 && (
-          <div className="text-center py-8 text-gray-500">
+          <div className="text-center py-8 text-text-muted">
             No data available for the selected criteria
           </div>
         )}
@@ -480,45 +481,45 @@ export default function AdvancedReports() {
 
     if (reportData.total_sales !== undefined) {
       cards.push(
-        <div key="sales" className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-          <div className="text-blue-600 text-sm font-semibold">Total Sales</div>
-          <div className="text-2xl font-bold text-blue-900">₹{reportData.total_sales.toLocaleString()}</div>
+        <div key="sales" className="bg-primary-subtle p-4 rounded-lg border border-primary-500/30">
+          <div className="text-primary-400 text-sm font-semibold">Total Sales</div>
+          <div className="text-2xl font-bold text-text-primary">₹{reportData.total_sales.toLocaleString()}</div>
         </div>
       )
     }
 
     if (reportData.num_bills !== undefined) {
       cards.push(
-        <div key="bills" className="bg-green-50 p-4 rounded-lg border border-green-200">
-          <div className="text-green-600 text-sm font-semibold">Number of Bills</div>
-          <div className="text-2xl font-bold text-green-900">{reportData.num_bills}</div>
+        <div key="bills" className="bg-success-bg p-4 rounded-lg border border-success/30">
+          <div className="text-success text-sm font-semibold">Number of Bills</div>
+          <div className="text-2xl font-bold text-text-primary">{reportData.num_bills}</div>
         </div>
       )
     }
 
     if (reportData.average_bill_value !== undefined) {
       cards.push(
-        <div key="avg" className="bg-purple-50 p-4 rounded-lg border border-purple-200">
-          <div className="text-purple-600 text-sm font-semibold">Average Bill Value</div>
-          <div className="text-2xl font-bold text-purple-900">₹{reportData.average_bill_value.toLocaleString()}</div>
+        <div key="avg" className="bg-surface-hover p-4 rounded-lg border border-border">
+          <div className="text-primary-400 text-sm font-semibold">Average Bill Value</div>
+          <div className="text-2xl font-bold text-text-primary">₹{reportData.average_bill_value.toLocaleString()}</div>
         </div>
       )
     }
 
     if (reportData.products && Array.isArray(reportData.products)) {
       cards.push(
-        <div key="count" className="bg-indigo-50 p-4 rounded-lg border border-indigo-200">
-          <div className="text-indigo-600 text-sm font-semibold">Total Items</div>
-          <div className="text-2xl font-bold text-indigo-900">{reportData.products.length}</div>
+        <div key="count" className="bg-surface-hover p-4 rounded-lg border border-border">
+          <div className="text-primary-400 text-sm font-semibold">Total Items</div>
+          <div className="text-2xl font-bold text-text-primary">{reportData.products.length}</div>
         </div>
       )
     }
 
     if (reportData.categories && Array.isArray(reportData.categories)) {
       cards.push(
-        <div key="categories" className="bg-orange-50 p-4 rounded-lg border border-orange-200">
-          <div className="text-orange-600 text-sm font-semibold">Categories</div>
-          <div className="text-2xl font-bold text-orange-900">{reportData.categories.length}</div>
+        <div key="categories" className="bg-surface-hover p-4 rounded-lg border border-border">
+          <div className="text-primary-400 text-sm font-semibold">Categories</div>
+          <div className="text-2xl font-bold text-text-primary">{reportData.categories.length}</div>
         </div>
       )
     }
@@ -527,97 +528,87 @@ export default function AdvancedReports() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 rounded-2xl shadow-2xl p-8 text-white">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <ChartBarIcon className="w-10 h-10" />
-              <h1 className="text-4xl font-black">Advanced Reports</h1>
-            </div>
-            <p className="text-xl text-white/90">
-              Deep analytics and insights with advanced reporting templates
-            </p>
-          </div>
-          <div className="text-right">
-            <div className="text-5xl font-black">{reportTemplates.length}</div>
-            <div className="text-sm text-white/80 font-semibold">Report Templates</div>
-          </div>
-        </div>
-      </div>
+    <div className="space-y-8">
+      {/* Page Header */}
+      <PageHeader
+        title="Advanced Reports"
+        subtitle="Deep analytics and insights with advanced reporting templates"
+        icon={ChartBarIcon}
+        actions={
+          <Badge color="violet">{reportTemplates.length} Report Templates</Badge>
+        }
+      />
 
       {/* Date Range Selector */}
-      <div className="bg-white/80 backdrop-blur-xl rounded-xl shadow-lg border border-neutral-200 p-6">
+      <PremiumCard delay={100}>
         <div className="flex items-center gap-4">
-          <CalendarIcon className="w-6 h-6 text-primary" />
+          <CalendarIcon className="w-6 h-6 text-primary-400" />
           <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-semibold text-neutral-700 mb-2">Start Date</label>
+              <label className="block text-sm font-semibold text-text-tertiary mb-2">Start Date</label>
               <input
                 type="date"
                 value={dateRange.start}
                 onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))}
-                className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="input w-full"
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-neutral-700 mb-2">End Date</label>
+              <label className="block text-sm font-semibold text-text-tertiary mb-2">End Date</label>
               <input
                 type="date"
                 value={dateRange.end}
                 onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))}
-                className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="input w-full"
               />
             </div>
           </div>
         </div>
-      </div>
+      </PremiumCard>
 
       {/* Reports by Category */}
-      {categories.map(category => (
+      {categories.map((category, catIndex) => (
         <div key={category} className="space-y-4">
-          <h2 className="text-2xl font-bold text-neutral-800 flex items-center gap-3">
-            <div className="w-2 h-8 bg-gradient-to-b from-primary to-accent rounded-full"></div>
+          <h2 className="text-2xl font-bold text-text-primary flex items-center gap-3">
+            <div className="w-2 h-8 bg-gradient-to-b from-primary-400 to-primary-600 rounded-full"></div>
             {category}
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {reportTemplates
               .filter(report => report.category === category)
-              .map(report => (
+              .map((report, index) => (
                 <div
                   key={report.id}
-                  className="group bg-white/80 backdrop-blur-xl rounded-xl shadow-lg border border-neutral-200 overflow-hidden hover:shadow-2xl hover:scale-102 transition-all duration-300"
+                  className="opacity-0 animate-fade-in-up"
+                  style={{ animationDelay: `${200 + catIndex * 100 + index * 50}ms`, animationFillMode: 'forwards' }}
                 >
-                  {/* Header */}
-                  <div className="bg-gradient-to-r from-neutral-50 to-neutral-100 p-6 border-b border-neutral-200">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="text-4xl">{report.icon}</div>
-                      <span className="text-xs px-3 py-1 bg-green-100 text-green-700 rounded-full font-bold border border-green-300">
-                        Real Data
-                      </span>
+                  <PremiumCard hover className="h-full">
+                    <div className="p-6">
+                      {/* Header */}
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="text-4xl">{report.icon}</div>
+                        <Badge color="emerald">Real Data</Badge>
+                      </div>
+                      <h3 className="text-lg font-bold text-text-primary mb-2">
+                        {report.name}
+                      </h3>
+
+                      {/* Content */}
+                      <p className="text-sm text-text-tertiary mb-6 leading-relaxed">
+                        {report.description}
+                      </p>
+
+                      <Button
+                        onClick={() => handleGenerateReport(report.id)}
+                        disabled={loading}
+                        className="w-full"
+                        icon={ChartBarIcon}
+                      >
+                        {loading && selectedReportName === report.name ? 'Generating...' : 'View Report'}
+                      </Button>
                     </div>
-                    <h3 className="text-lg font-bold text-neutral-800 group-hover:text-primary transition-colors">
-                      {report.name}
-                    </h3>
-                  </div>
-
-                  {/* Content */}
-                  <div className="p-6">
-                    <p className="text-sm text-neutral-600 mb-6 leading-relaxed">
-                      {report.description}
-                    </p>
-
-                    <button
-                      onClick={() => handleGenerateReport(report.id)}
-                      disabled={loading}
-                      className="w-full bg-gradient-to-r from-primary to-primary-dark text-white px-6 py-3 rounded-xl font-bold hover:scale-105 transition-transform shadow-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <ChartBarIcon className="w-5 h-5" />
-                      {loading && selectedReportName === report.name ? 'Generating...' : 'View Report'}
-                    </button>
-                  </div>
+                  </PremiumCard>
                 </div>
               ))}
           </div>
@@ -625,26 +616,26 @@ export default function AdvancedReports() {
       ))}
 
       {/* Info Banner */}
-      <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-6 border border-indigo-200">
+      <PremiumCard delay={1000}>
         <div className="flex items-start gap-4">
-          <ChartBarIcon className="w-6 h-6 text-indigo-600 flex-shrink-0 mt-1" />
+          <ChartBarIcon className="w-6 h-6 text-primary-400 flex-shrink-0 mt-1" />
           <div>
-            <h3 className="font-bold text-indigo-900 mb-2">Real-Time Analytics with Database</h3>
-            <p className="text-indigo-700 text-sm leading-relaxed">
+            <h3 className="font-bold text-text-primary mb-2">Real-Time Analytics with Database</h3>
+            <p className="text-text-tertiary text-sm leading-relaxed">
               All reports are generated from your actual business data stored in the database.
               Select a date range and click "View Report" to see comprehensive analytics with real values.
               Reports include sales data, staff performance, inventory analysis, and customer insights.
             </p>
           </div>
         </div>
-      </div>
+      </PremiumCard>
 
       {/* Report Data Modal */}
       {showModal && reportData && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50 p-4">
+          <div className="bg-surface rounded-2xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col border border-border">
             {/* Modal Header */}
-            <div className="bg-gradient-to-r from-primary to-accent p-6 text-white flex justify-between items-center">
+            <div className="bg-gradient-to-r from-primary-600 to-primary-700 p-6 text-white flex justify-between items-center border-b border-border">
               <div>
                 <h2 className="text-2xl font-bold">{selectedReportName}</h2>
                 <p className="text-white/80 text-sm mt-1">
@@ -673,7 +664,7 @@ export default function AdvancedReports() {
             </div>
 
             {/* Modal Content */}
-            <div className="flex-1 overflow-auto p-6">
+            <div className="flex-1 overflow-auto p-6 bg-background">
               {/* Summary Cards */}
               {renderSummaryCards() && (
                 <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -682,7 +673,7 @@ export default function AdvancedReports() {
               )}
 
               {/* Table Data */}
-              <div className="bg-white rounded-xl border border-neutral-200 shadow-sm">
+              <div className="bg-surface rounded-xl border border-border shadow-sm overflow-hidden">
                 {renderTableData()}
               </div>
             </div>

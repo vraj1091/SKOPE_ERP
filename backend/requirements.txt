@@ -14,7 +14,7 @@ openpyxl==3.1.2
 reportlab==4.0.7
 qrcode==7.4.2
 pillow==10.1.0
-bcrypt==4.1.1
+bcrypt==4.0.1
 email-validator==2.1.0
 
 # Meta (Facebook/Instagram/WhatsApp) Integration

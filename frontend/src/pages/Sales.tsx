@@ -2,11 +2,20 @@ import { useEffect, useState } from 'react'
 import api from '../utils/api'
 import toast from 'react-hot-toast'
 import { Sale } from '../utils/types'
-import { PlusIcon, MagnifyingGlassIcon, ShoppingCartIcon, CurrencyDollarIcon, ClockIcon } from '@heroicons/react/24/outline'
+import {
+  PlusIcon,
+  MagnifyingGlassIcon,
+  ShoppingCartIcon,
+  CurrencyDollarIcon,
+  ClockIcon,
+  ArrowPathIcon,
+  ReceiptPercentIcon
+} from '@heroicons/react/24/outline'
 import { format } from 'date-fns'
 import StoreSelector from '../components/StoreSelector'
 import Modal from '../components/Modal'
 import SaleForm from '../components/SaleForm'
+import { StatCard, Card, CardHeader, CardBody, Button, Input, Badge } from '../components/ui'
 
 export default function Sales() {
   const [sales, setSales] = useState<Sale[]>([])
@@ -23,16 +32,12 @@ export default function Sales() {
   const loadSales = async () => {
     try {
       setError(null)
-      console.log('Fetching sales from API...')
       const params: any = {}
       if (selectedStoreId !== 'all') params.store_id = selectedStoreId
-      
+
       const response = await api.get('/sales/', { params })
-      console.log('Sales data received:', response.data)
       setSales(response.data)
-      toast.success(`Loaded ${response.data.length} sales transactions`)
     } catch (error: any) {
-      console.error('Sales API error:', error)
       const errorMessage = error.response?.data?.detail || error.message || 'Failed to load sales'
       setError(errorMessage)
       toast.error(errorMessage)
@@ -42,8 +47,7 @@ export default function Sales() {
   }
 
   const filteredSales = sales.filter(
-    (sale) =>
-      sale.invoice_number.toLowerCase().includes(searchTerm.toLowerCase())
+    (sale) => sale.invoice_number.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   // Calculate stats
@@ -58,169 +62,146 @@ export default function Sales() {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center h-64 space-y-4">
-        <div className="loading-spinner w-16 h-16"></div>
-        <p className="text-neutral-600 font-medium">Loading sales data...</p>
+      <div className="space-y-6">
+        <div className="skeleton h-10 w-64" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="skeleton h-32" />
+          ))}
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 animate-fade-in-up">
       {/* Header */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-4xl font-black gradient-text flex items-center">
-            <ShoppingCartIcon className="w-10 h-10 mr-3 text-primary" />
-            Sales & POS
-          </h1>
-          <p className="text-neutral-600 mt-2 font-medium">
+          <h1 className="text-4xl font-bold text-text-primary mb-2">Sales & POS</h1>
+          <p className="text-text-tertiary text-lg">
             Manage sales transactions and point of sale
           </p>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <StoreSelector
             selectedStoreId={selectedStoreId}
             onStoreChange={setSelectedStoreId}
             showAllOption={true}
           />
-          <button
-            onClick={() => setShowSaleModal(true)}
-            className="btn btn-primary flex items-center space-x-2"
-          >
+          <Button onClick={() => setShowSaleModal(true)}>
             <PlusIcon className="w-5 h-5" />
-            <span>New Sale</span>
-          </button>
+            New Sale
+          </Button>
         </div>
       </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="stat-card bg-gradient-to-br from-blue-500 to-blue-600">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-blue-100 text-sm font-semibold mb-1">Total Sales</p>
-              <p className="text-4xl font-black">{sales.length}</p>
-              <p className="text-blue-100 text-sm mt-2">Transactions</p>
-            </div>
-            <div className="bg-white/20 p-3 rounded-xl">
-              <ShoppingCartIcon className="w-8 h-8" />
-            </div>
-          </div>
-        </div>
-        
-        <div className="stat-card bg-gradient-to-br from-green-500 to-emerald-600">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-green-100 text-sm font-semibold mb-1">Total Revenue</p>
-              <p className="text-4xl font-black">₹{totalAmount.toFixed(0)}</p>
-              <p className="text-green-100 text-sm mt-2">All Time</p>
-            </div>
-            <div className="bg-white/20 p-3 rounded-xl">
-              <CurrencyDollarIcon className="w-8 h-8" />
-            </div>
-          </div>
-        </div>
-        
-        <div className="stat-card bg-gradient-to-br from-purple-500 to-purple-600">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-purple-100 text-sm font-semibold mb-1">Today's Sales</p>
-              <p className="text-4xl font-black">₹{todayAmount.toFixed(0)}</p>
-              <p className="text-purple-100 text-sm mt-2">{todaySales.length} transactions</p>
-            </div>
-            <div className="bg-white/20 p-3 rounded-xl">
-              <ClockIcon className="w-8 h-8" />
-            </div>
-          </div>
-        </div>
+        <StatCard
+          title="Total Transactions"
+          value={sales.length}
+          icon={<ReceiptPercentIcon className="w-6 h-6" />}
+        />
+        <StatCard
+          title="Total Revenue"
+          value={`₹${totalAmount.toLocaleString()}`}
+          change={12.5}
+          trend="up"
+          changeLabel="vs last month"
+          icon={<CurrencyDollarIcon className="w-6 h-6" />}
+        />
+        <StatCard
+          title="Today's Sales"
+          value={`₹${todayAmount.toLocaleString()}`}
+          change={todaySales.length}
+          changeLabel={`${todaySales.length} transactions`}
+          icon={<ClockIcon className="w-6 h-6" />}
+        />
       </div>
 
       {/* Error Display */}
       {error && (
-        <div className="card bg-red-50 border-l-4 border-red-500">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-bold text-red-800">Error Loading Sales</h3>
-              <p className="text-red-600 mt-1">{error}</p>
+        <Card className="border-danger/20 bg-danger-bg">
+          <CardBody>
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="font-semibold text-danger mb-1">Error Loading Sales</h4>
+                <p className="text-sm text-text-tertiary">{error}</p>
+              </div>
+              <Button variant="secondary" onClick={loadSales} size="sm">
+                <ArrowPathIcon className="w-4 h-4" />
+                Retry
+              </Button>
             </div>
-            <button onClick={loadSales} className="btn btn-accent">
-              Retry
-            </button>
-          </div>
-        </div>
+          </CardBody>
+        </Card>
       )}
 
       {/* Search */}
-      <div className="card">
-        <div className="relative">
-          <MagnifyingGlassIcon className="w-5 h-5 absolute left-4 top-1/2 transform -translate-y-1/2 text-neutral-400" />
-          <input
-            type="text"
-            placeholder="Search by invoice number..."
-            className="input pl-12"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-      </div>
+      <Card>
+        <CardBody>
+          <div className="flex gap-4">
+            <div className="flex-1 relative">
+              <MagnifyingGlassIcon className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-text-muted" />
+              <input
+                type="text"
+                placeholder="Search by invoice number..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="input pl-12"
+              />
+            </div>
+            <Button variant="secondary" onClick={loadSales}>
+              <ArrowPathIcon className="w-5 h-5" />
+              Refresh
+            </Button>
+          </div>
+        </CardBody>
+      </Card>
 
       {/* Sales Table */}
-      <div className="card overflow-hidden p-0">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gradient-to-r from-primary to-primary-light text-white">
+      <Card>
+        <div className="table-container">
+          <table className="data-table">
+            <thead>
               <tr>
-                <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">
-                  Invoice #
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">
-                  Date
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">
-                  Customer
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">
-                  Items
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">
-                  Amount
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">
-                  Payment
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">
-                  Status
-                </th>
+                <th>Invoice #</th>
+                <th>Date</th>
+                <th>Customer</th>
+                <th>Items</th>
+                <th>Amount</th>
+                <th>Payment</th>
+                <th>Status</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-neutral-100">
-              {filteredSales.map((sale, index) => (
-                <tr key={sale.id} className="table-row hover:shadow-md transition-all" style={{animationDelay: `${index * 0.05}s`}}>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="font-mono text-sm font-bold text-primary">{sale.invoice_number}</span>
+            <tbody>
+              {filteredSales.map((sale) => (
+                <tr key={sale.id}>
+                  <td>
+                    <span className="font-mono font-semibold text-primary-400">
+                      {sale.invoice_number}
+                    </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-600">
+                  <td className="text-text-tertiary">
                     {format(new Date(sale.sale_date), 'MMM dd, yyyy HH:mm')}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-900 font-medium">
+                  <td className="font-medium">
                     {sale.customer_id ? 'Customer' : 'Walk-in'}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-600">
+                  <td className="text-text-tertiary">
                     {sale.items?.length || 0} items
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="font-bold text-lg text-green-600">₹{sale.total_amount.toFixed(2)}</span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="badge badge-info uppercase">
-                      {sale.payment_mode}
+                  <td>
+                    <span className="font-bold text-lg text-success">
+                      ₹{sale.total_amount.toFixed(2)}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="badge badge-success capitalize">
-                      {sale.payment_status}
-                    </span>
+                  <td>
+                    <Badge variant="info">{sale.payment_mode.toUpperCase()}</Badge>
+                  </td>
+                  <td>
+                    <Badge variant="success">{sale.payment_status}</Badge>
                   </td>
                 </tr>
               ))}
@@ -230,14 +211,16 @@ export default function Sales() {
 
         {filteredSales.length === 0 && !error && (
           <div className="text-center py-16">
-            <ShoppingCartIcon className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
-            <p className="text-neutral-600 font-medium">No sales found</p>
-            <button onClick={loadSales} className="btn btn-primary mt-4">
-              Refresh Data
-            </button>
+            <ShoppingCartIcon className="w-16 h-16 mx-auto mb-4 text-text-muted opacity-50" />
+            <h3 className="text-xl font-semibold text-text-primary mb-2">No Sales Found</h3>
+            <p className="text-text-tertiary mb-6">Start recording sales to see them here</p>
+            <Button onClick={() => setShowSaleModal(true)}>
+              <PlusIcon className="w-5 h-5" />
+              Create Sale
+            </Button>
           </div>
         )}
-      </div>
+      </Card>
 
       {/* New Sale Modal */}
       <Modal

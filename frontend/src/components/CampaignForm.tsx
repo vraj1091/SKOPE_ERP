@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useAuthStore } from '../store/authStore';
+import { CyberButton } from './NextGenUI'; // Import CyberButton for consistency
 
 interface CampaignFormProps {
   onSuccess: () => void;
@@ -39,11 +40,10 @@ const CampaignForm: React.FC<CampaignFormProps> = ({ onSuccess, onCancel }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    
+
     try {
       const token = localStorage.getItem('token');
-      
-      // Prepare data with proper formatting
+
       const campaignData = {
         name: formData.name,
         description: formData.description || null,
@@ -61,15 +61,11 @@ const CampaignForm: React.FC<CampaignFormProps> = ({ onSuccess, onCancel }) => {
         discount_code: formData.discount_code || null,
         discount_percentage: formData.discount_percentage ? parseFloat(formData.discount_percentage.toString()) : null
       };
-      
-      console.log('Sending campaign data:', campaignData);
-      
-      const response = await axios.post('/api/v1/campaigns/', campaignData, {
+
+      await axios.post('/api/v1/campaigns/', campaignData, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      
-      console.log('Campaign created:', response.data);
-      alert('Campaign created successfully!');
+
       onSuccess();
     } catch (error: any) {
       console.error('Error creating campaign:', error);
@@ -96,12 +92,15 @@ const CampaignForm: React.FC<CampaignFormProps> = ({ onSuccess, onCancel }) => {
     }
   };
 
+  const inputClasses = "w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/50 transition-all";
+  const labelClasses = "block text-sm font-semibold text-gray-300 mb-2";
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Campaign Name */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
+          <label className={labelClasses}>
             Campaign Name *
           </label>
           <input
@@ -110,13 +109,13 @@ const CampaignForm: React.FC<CampaignFormProps> = ({ onSuccess, onCancel }) => {
             value={formData.name}
             onChange={handleChange}
             required
-            className="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+            className={inputClasses}
             placeholder="e.g., Diwali Sale 2024"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
+          <label className={labelClasses}>
             Campaign Type *
           </label>
           <select
@@ -124,19 +123,19 @@ const CampaignForm: React.FC<CampaignFormProps> = ({ onSuccess, onCancel }) => {
             value={formData.campaign_type}
             onChange={handleChange}
             required
-            className="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+            className={inputClasses}
           >
-            <option value="whatsapp">📱 WhatsApp</option>
-            <option value="sms">💬 SMS</option>
-            <option value="email">📧 Email</option>
-            <option value="notification">🔔 Notification</option>
+            <option value="whatsapp" className="bg-gray-900 text-white">📱 WhatsApp</option>
+            <option value="sms" className="bg-gray-900 text-white">💬 SMS</option>
+            <option value="email" className="bg-gray-900 text-white">📧 Email</option>
+            <option value="notification" className="bg-gray-900 text-white">🔔 Notification</option>
           </select>
         </div>
       </div>
 
       {/* Trigger Type */}
       <div>
-        <label className="block text-sm font-semibold text-gray-700 mb-2">
+        <label className={labelClasses}>
           Trigger Type *
         </label>
         <select
@@ -147,22 +146,22 @@ const CampaignForm: React.FC<CampaignFormProps> = ({ onSuccess, onCancel }) => {
             loadTemplate(e.target.value);
           }}
           required
-          className="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+          className={inputClasses}
         >
-          <option value="manual">✋ Manual</option>
-          <option value="birthday">🎂 Birthday</option>
-          <option value="festival">🎉 Festival</option>
-          <option value="warranty_expiry">⚠️ Warranty Expiry</option>
-          <option value="cart_abandoned">🛒 Cart Abandoned</option>
-          <option value="no_purchase_30_days">⏰ No Purchase (30 days)</option>
-          <option value="purchase_anniversary">🎊 Purchase Anniversary</option>
-          <option value="geo_targeted">📍 Geo-Targeted</option>
+          <option value="manual" className="bg-gray-900 text-white">✋ Manual</option>
+          <option value="birthday" className="bg-gray-900 text-white">🎂 Birthday</option>
+          <option value="festival" className="bg-gray-900 text-white">🎉 Festival</option>
+          <option value="warranty_expiry" className="bg-gray-900 text-white">⚠️ Warranty Expiry</option>
+          <option value="cart_abandoned" className="bg-gray-900 text-white">🛒 Cart Abandoned</option>
+          <option value="no_purchase_30_days" className="bg-gray-900 text-white">⏰ No Purchase (30 days)</option>
+          <option value="purchase_anniversary" className="bg-gray-900 text-white">🎊 Purchase Anniversary</option>
+          <option value="geo_targeted" className="bg-gray-900 text-white">📍 Geo-Targeted</option>
         </select>
       </div>
 
       {/* Description */}
       <div>
-        <label className="block text-sm font-semibold text-gray-700 mb-2">
+        <label className={labelClasses}>
           Description
         </label>
         <textarea
@@ -170,14 +169,14 @@ const CampaignForm: React.FC<CampaignFormProps> = ({ onSuccess, onCancel }) => {
           value={formData.description}
           onChange={handleChange}
           rows={2}
-          className="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+          className={inputClasses}
           placeholder="Brief description of your campaign..."
         />
       </div>
 
       {/* Message Template */}
       <div>
-        <label className="block text-sm font-semibold text-gray-700 mb-2">
+        <label className={labelClasses}>
           Message Template *
         </label>
         <div className="text-xs text-gray-500 mb-2">
@@ -189,7 +188,7 @@ const CampaignForm: React.FC<CampaignFormProps> = ({ onSuccess, onCancel }) => {
           onChange={handleChange}
           required
           rows={6}
-          className="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all font-mono text-sm"
+          className={`${inputClasses} font-mono text-sm`}
           placeholder="Type your message here..."
         />
       </div>
@@ -197,7 +196,7 @@ const CampaignForm: React.FC<CampaignFormProps> = ({ onSuccess, onCancel }) => {
       {/* Discount Settings */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
+          <label className={labelClasses}>
             Discount Code
           </label>
           <input
@@ -205,13 +204,13 @@ const CampaignForm: React.FC<CampaignFormProps> = ({ onSuccess, onCancel }) => {
             name="discount_code"
             value={formData.discount_code}
             onChange={handleChange}
-            className="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+            className={inputClasses}
             placeholder="e.g., DIWALI24"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
+          <label className={labelClasses}>
             Discount %
           </label>
           <input
@@ -221,7 +220,7 @@ const CampaignForm: React.FC<CampaignFormProps> = ({ onSuccess, onCancel }) => {
             onChange={handleChange}
             min="0"
             max="100"
-            className="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+            className={inputClasses}
             placeholder="10"
           />
         </div>
@@ -230,7 +229,7 @@ const CampaignForm: React.FC<CampaignFormProps> = ({ onSuccess, onCancel }) => {
       {/* Scheduling */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
+          <label className={labelClasses}>
             Start Date
           </label>
           <input
@@ -238,12 +237,12 @@ const CampaignForm: React.FC<CampaignFormProps> = ({ onSuccess, onCancel }) => {
             name="start_date"
             value={formData.start_date}
             onChange={handleChange}
-            className="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+            className={inputClasses}
           />
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
+          <label className={labelClasses}>
             End Date
           </label>
           <input
@@ -251,12 +250,12 @@ const CampaignForm: React.FC<CampaignFormProps> = ({ onSuccess, onCancel }) => {
             name="end_date"
             value={formData.end_date}
             onChange={handleChange}
-            className="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+            className={inputClasses}
           />
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
+          <label className={labelClasses}>
             Send Time (HH:MM)
           </label>
           <input
@@ -264,7 +263,7 @@ const CampaignForm: React.FC<CampaignFormProps> = ({ onSuccess, onCancel }) => {
             name="send_time"
             value={formData.send_time}
             onChange={handleChange}
-            className="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+            className={inputClasses}
           />
         </div>
       </div>
@@ -272,7 +271,7 @@ const CampaignForm: React.FC<CampaignFormProps> = ({ onSuccess, onCancel }) => {
       {/* Days Before Trigger */}
       {(formData.trigger_type === 'warranty_expiry' || formData.trigger_type === 'birthday') && (
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
+          <label className={labelClasses}>
             Days Before Trigger
           </label>
           <input
@@ -281,7 +280,7 @@ const CampaignForm: React.FC<CampaignFormProps> = ({ onSuccess, onCancel }) => {
             value={formData.days_before_trigger}
             onChange={handleChange}
             min="0"
-            className="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+            className={inputClasses}
             placeholder="7"
           />
           <p className="text-xs text-gray-500 mt-1">Send message X days before the event</p>
@@ -291,7 +290,7 @@ const CampaignForm: React.FC<CampaignFormProps> = ({ onSuccess, onCancel }) => {
       {/* Geo Location */}
       {formData.trigger_type === 'geo_targeted' && (
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
+          <label className={labelClasses}>
             Geo Location
           </label>
           <input
@@ -299,25 +298,25 @@ const CampaignForm: React.FC<CampaignFormProps> = ({ onSuccess, onCancel }) => {
             name="geo_location"
             value={formData.geo_location}
             onChange={handleChange}
-            className="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+            className={inputClasses}
             placeholder="City, State, or Pincode"
           />
         </div>
       )}
 
       {/* Buttons */}
-      <div className="flex gap-4 pt-4">
-        <button
+      <div className="flex gap-4 pt-4 border-t border-white/10">
+        <CyberButton
           type="submit"
           disabled={loading}
-          className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-6 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+          className="flex-1 justify-center"
         >
           {loading ? '🔄 Creating...' : '🚀 Create Campaign'}
-        </button>
+        </CyberButton>
         <button
           type="button"
           onClick={onCancel}
-          className="px-6 py-3 border-2 border-gray-300 rounded-lg font-semibold text-gray-700 hover:bg-gray-50 transition-all"
+          className="px-6 py-3 rounded-lg font-semibold text-gray-400 hover:text-white hover:bg-white/5 border border-white/10 transition-all"
         >
           Cancel
         </button>
