@@ -5,7 +5,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from app.api.v1 import auth, inventory, sales, customers, financial, reports, users, campaigns, marketing, stores, chatbot, dashboard, system, automation, ads, comparison
+from app.api.v1 import auth, inventory, sales, customers, financial, reports, users, campaigns, marketing, stores, chatbot, dashboard, system, automation, ads, comparison, campaign_execution
 from app.core.config import settings
 from app.db.database import engine
 from app.db import models
@@ -66,6 +66,7 @@ app.include_router(customers.router, prefix="/api/v1/customers", tags=["Customer
 app.include_router(financial.router, prefix="/api/v1/financial", tags=["Financial"])
 app.include_router(reports.router, prefix="/api/v1/reports", tags=["Reports"])
 app.include_router(campaigns.router, prefix="/api/v1/campaigns", tags=["Marketing Campaigns"])
+app.include_router(campaign_execution.router, prefix="/api/v1/marketing/execution", tags=["Campaign Execution"])
 app.include_router(marketing.router, prefix="/api/v1/marketing", tags=["Marketing Integrations"])
 app.include_router(chatbot.router, prefix="/api/v1/chatbot", tags=["AI Chatbot"])
 app.include_router(dashboard.router, prefix="/api/v1/dashboard", tags=["Dashboard"])
