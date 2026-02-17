@@ -6,8 +6,9 @@ services:
     region: oregon
     plan: free
     branch: main
-    buildCommand: bash build.sh
-    startCommand: bash start.sh
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt && python setup_and_seed.py --reset
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
@@ -22,4 +23,22 @@ services:
       - key: RENDER
         value: true
     healthCheckPath: /health
+    autoDeploy: true
+
+  # Frontend Static Site
+  - type: web
+    name: skope-erp-frontend
+    runtime: static
+    region: oregon
+    plan: free
+    branch: main
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    publishPath: ./dist
+    pullRequestPreviewsEnabled: true
+    envVars:
+      - key: NODE_VERSION
+        value: 18.17.0
+      - key: VITE_API_URL
+        value: https://skope-erp-backend.onrender.com
     autoDeploy: true

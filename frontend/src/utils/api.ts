@@ -2,10 +2,21 @@ import axios, { AxiosError } from 'axios'
 import { useAuthStore } from '../store/authStore'
 import toast from 'react-hot-toast'
 
+// Determine API URL based on environment
+// In production (Render), use the VITE_API_URL environment variable
+// In development, use localhost
+const getApiUrl = () => {
+  // Check if we're in production (Render sets this)
+  if (import.meta.env.VITE_API_URL) {
+    return `${import.meta.env.VITE_API_URL}/api/v1`
+  }
+  // Development - use localhost
+  return 'http://localhost:8000/api/v1'
+}
+
 // Create axios instance with better configuration
-// Use absolute URL to backend so it works on any frontend port
 const api = axios.create({
-  baseURL: 'http://localhost:8000/api/v1',
+  baseURL: getApiUrl(),
   headers: {
     'Content-Type': 'application/json',
   },
@@ -93,7 +104,11 @@ api.interceptors.response.use(
 // Health check function
 export const checkBackendHealth = async (): Promise<boolean> => {
   try {
-    const response = await axios.get('http://localhost:8000/health', { timeout: 5000 })
+    const healthUrl = import.meta.env.VITE_API_URL
+      ? `${import.meta.env.VITE_API_URL}/health`
+      : 'http://localhost:8000/health'
+
+    const response = await axios.get(healthUrl, { timeout: 5000 })
     console.log('[Health Check] Backend is healthy:', response.data)
     return true
   } catch (error) {

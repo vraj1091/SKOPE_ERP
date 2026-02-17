@@ -1,13 +1,16 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import path from 'path'
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src'),
+  build: {
+    outDir: 'dist',
+    // Optimize build for production
+    rollupOptions: {
+      output: {
+        manualChunks: undefined,
+      },
     },
   },
   server: {
@@ -20,5 +23,7 @@ export default defineConfig({
       },
     },
   },
+  // Ensure _redirects file is copied to dist
+  publicDir: 'public',
 })
 
