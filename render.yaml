@@ -1,0 +1,25 @@
+services:
+  # Backend API Service
+  - type: web
+    name: skope-erp-backend
+    runtime: python
+    region: oregon
+    plan: free
+    branch: main
+    buildCommand: bash build.sh
+    startCommand: bash start.sh
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: DATABASE_URL
+        value: sqlite:////opt/render/project/src/backend/skope_erp.db
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALGORITHM
+        value: HS256
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: 1440
+      - key: RENDER
+        value: true
+    healthCheckPath: /health
+    autoDeploy: true
