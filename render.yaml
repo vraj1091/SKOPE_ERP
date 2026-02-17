@@ -25,17 +25,16 @@ services:
     healthCheckPath: /health
     autoDeploy: true
 
-  # Frontend Static Site
+  # Frontend - Using Node web service to serve static files
   - type: web
     name: skope-erp-frontend
-    runtime: static
+    runtime: node
     region: oregon
     plan: free
     branch: main
     rootDir: frontend
     buildCommand: npm install && npm run build
-    publishPath: ./dist
-    pullRequestPreviewsEnabled: true
+    startCommand: npx serve -s dist -l $PORT
     envVars:
       - key: NODE_VERSION
         value: 18.17.0
