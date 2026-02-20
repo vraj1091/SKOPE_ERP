@@ -150,7 +150,7 @@ export default function Financial() {
       </PremiumCard>
 
       {/* Expenses Table */}
-      <div className="relative premium-card rounded-2xl overflow-hidden opacity-0 animate-slide-up" style={{ animationDelay: '800ms', animationFillMode: 'forwards' }}>
+      <div className="relative premium-card rounded-2xl overflow-hidden opacity-0 animate-fade-in-up" style={{ animationDelay: '800ms', animationFillMode: 'forwards' }}>
         <div className="p-6 border-b border-white/10">
           <h2 className="text-xl font-bold text-white flex items-center gap-2">
             <ReceiptPercentIcon className="w-6 h-6 text-violet-400" />

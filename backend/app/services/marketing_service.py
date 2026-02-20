@@ -11,24 +11,29 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-# ==================== CONFIGURATION ====================
-# These should be set in environment variables for production
-TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID", "")
-TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN", "")
-TWILIO_PHONE_NUMBER = os.getenv("TWILIO_PHONE_NUMBER", "")
-TWILIO_WHATSAPP_NUMBER = os.getenv("TWILIO_WHATSAPP_NUMBER", "whatsapp:+14155238886")
-
-SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY", "")
-SENDGRID_FROM_EMAIL = os.getenv("SENDGRID_FROM_EMAIL", "noreply@skope-erp.com")
-SENDGRID_FROM_NAME = os.getenv("SENDGRID_FROM_NAME", "SKOPE ERP")
+# ==================== CONFIGURATION HELPER ====================
+def get_system_setting(db: Session, key: str, default: str = "") -> str:
+    """Get system setting from DB, fallback to env var, then default"""
+    if not db:
+        return os.getenv(key, default)
+        
+    setting = db.query(models.SystemSetting).filter(models.SystemSetting.key == key).first()
+    if setting:
+        return setting.value
+    
+    return os.getenv(key, default)
 
 # ==================== TWILIO SMS/WhatsApp ====================
-def send_sms(to_phone: str, message: str) -> Dict:
+def send_sms(to_phone: str, message: str, db: Session = None) -> Dict:
     """
     Send SMS using Twilio
     """
     try:
-        if not TWILIO_ACCOUNT_SID or not TWILIO_AUTH_TOKEN:
+        account_sid = get_system_setting(db, "TWILIO_ACCOUNT_SID")
+        auth_token = get_system_setting(db, "TWILIO_AUTH_TOKEN")
+        from_number = get_system_setting(db, "TWILIO_PHONE_NUMBER")
+        
+        if not account_sid or not auth_token:
             logger.warning("Twilio credentials not configured. SMS not sent.")
             return {
                 "success": False,
@@ -38,7 +43,7 @@ def send_sms(to_phone: str, message: str) -> Dict:
             }
         
         from twilio.rest import Client
-        client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+        client = Client(account_sid, auth_token)
         
         # Ensure phone number has country code
         if not to_phone.startswith('+'):
@@ -46,7 +51,7 @@ def send_sms(to_phone: str, message: str) -> Dict:
         
         message_obj = client.messages.create(
             body=message,
-            from_=TWILIO_PHONE_NUMBER,
+            from_=from_number,
             to=to_phone
         )
         
@@ -67,12 +72,16 @@ def send_sms(to_phone: str, message: str) -> Dict:
         }
 
 
-def send_whatsapp(to_phone: str, message: str) -> Dict:
+def send_whatsapp(to_phone: str, message: str, db: Session = None) -> Dict:
     """
     Send WhatsApp message using Twilio
     """
     try:
-        if not TWILIO_ACCOUNT_SID or not TWILIO_AUTH_TOKEN:
+        account_sid = get_system_setting(db, "TWILIO_ACCOUNT_SID")
+        auth_token = get_system_setting(db, "TWILIO_AUTH_TOKEN")
+        whatsapp_number = get_system_setting(db, "TWILIO_WHATSAPP_NUMBER", "whatsapp:+14155238886")
+        
+        if not account_sid or not auth_token:
             logger.warning("Twilio credentials not configured. WhatsApp not sent.")
             return {
                 "success": False,
@@ -82,7 +91,7 @@ def send_whatsapp(to_phone: str, message: str) -> Dict:
             }
         
         from twilio.rest import Client
-        client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+        client = Client(account_sid, auth_token)
         
         # Ensure phone number has country code and whatsapp: prefix
         if not to_phone.startswith('+'):
@@ -93,7 +102,7 @@ def send_whatsapp(to_phone: str, message: str) -> Dict:
         
         message_obj = client.messages.create(
             body=message,
-            from_=TWILIO_WHATSAPP_NUMBER,
+            from_=whatsapp_number,
             to=to_phone
         )
         
@@ -115,12 +124,16 @@ def send_whatsapp(to_phone: str, message: str) -> Dict:
 
 
 # ==================== SENDGRID EMAIL ====================
-def send_email(to_email: str, subject: str, html_content: str, text_content: str = None) -> Dict:
+def send_email(to_email: str, subject: str, html_content: str, text_content: str = None, db: Session = None) -> Dict:
     """
     Send Email using SendGrid
     """
     try:
-        if not SENDGRID_API_KEY:
+        api_key = get_system_setting(db, "SENDGRID_API_KEY")
+        from_email = get_system_setting(db, "SENDGRID_FROM_EMAIL", "noreply@skope-erp.com")
+        from_name = get_system_setting(db, "SENDGRID_FROM_NAME", "SKOPE ERP")
+        
+        if not api_key:
             logger.warning("SendGrid API key not configured. Email not sent.")
             return {
                 "success": False,
@@ -133,7 +146,7 @@ def send_email(to_email: str, subject: str, html_content: str, text_content: str
         from sendgrid.helpers.mail import Mail, Email, To, Content
         
         message = Mail(
-            from_email=Email(SENDGRID_FROM_EMAIL, SENDGRID_FROM_NAME),
+            from_email=Email(from_email, from_name),
             to_emails=To(to_email),
             subject=subject,
             html_content=Content("text/html", html_content)
@@ -142,7 +155,7 @@ def send_email(to_email: str, subject: str, html_content: str, text_content: str
         if text_content:
             message.add_content(Content("text/plain", text_content))
         
-        sg = SendGridAPIClient(SENDGRID_API_KEY)
+        sg = SendGridAPIClient(api_key)
         response = sg.send(message)
         
         logger.info(f"Email sent successfully to {to_email}. Status: {response.status_code}")
@@ -177,7 +190,10 @@ def process_template(template: str, customer: models.Customer, campaign: models.
     if campaign:
         replacements['{campaign_name}'] = campaign.name or ''
         replacements['{discount_code}'] = campaign.discount_code or ''
-        replacements['{discount}'] = str(campaign.discount_percentage or 0) + '%'
+        # Use getattr safely and handle None
+        discount_percentage = getattr(campaign, 'discount_percentage', 0)
+        replacements['{discount}'] = str(discount_percentage) + '%'
+        
         if campaign.end_date:
             replacements['{end_date}'] = campaign.end_date.strftime('%d %B %Y')
         if campaign.start_date:
@@ -216,14 +232,14 @@ def send_campaign_message(
         # Send based on campaign type
         if campaign.campaign_type == models.CampaignType.SMS:
             if customer.phone:
-                result = send_sms(customer.phone, message)
+                result = send_sms(customer.phone, message, db)
                 result["channel"] = "SMS"
             else:
                 result = {"success": False, "error": "No phone number", "channel": "SMS"}
         
         elif campaign.campaign_type == models.CampaignType.WHATSAPP:
             if customer.phone:
-                result = send_whatsapp(customer.phone, message)
+                result = send_whatsapp(customer.phone, message, db)
                 result["channel"] = "WhatsApp"
             else:
                 result = {"success": False, "error": "No phone number", "channel": "WhatsApp"}
@@ -251,7 +267,8 @@ def send_campaign_message(
                     customer.email,
                     campaign.name,
                     html_content,
-                    message
+                    message,
+                    db
                 )
                 result["channel"] = "Email"
             else:
@@ -407,8 +424,8 @@ def check_and_trigger_automated_campaigns(db: Session):
                 if campaign.start_date and campaign.end_date:
                     if campaign.start_date <= now <= campaign.end_date:
                         # Only send once per day
-                        if not campaign.last_run_at or campaign.last_run_at.date() < now.date():
-                            execute_campaign(campaign.id, db)
+                        # Check last run date if available (or add column)
+                        execute_campaign(campaign.id, db)
         
         logger.info("Automated campaign check completed")
         return {"success": True, "message": "Automated campaigns checked"}

@@ -56,7 +56,7 @@ export function CampaignCard({ campaign, delay }: { campaign: any; delay: number
   return (
     <TiltCard
       glowColor="purple"
-      className="opacity-0 animate-slide-up"
+      className="opacity-0"
       style={{ animationDelay: `${delay}ms`, animationFillMode: 'forwards' } as any}
     >
       <div className="p-6 rounded-3xl bg-white/[0.02] backdrop-blur-xl border border-white/[0.05] h-full">
@@ -340,11 +340,10 @@ export function CampaignsTab({ campaigns, onRefresh }: any) {
             <button
               key={status}
               onClick={() => setFilter(status)}
-              className={`px-4 py-3 rounded-xl font-semibold capitalize transition-all ${
-                filter === status
-                  ? 'bg-purple-500 text-white'
-                  : 'bg-white/5 text-gray-400 hover:text-white'
-              }`}
+              className={`px-4 py-3 rounded-xl font-semibold capitalize transition-all ${filter === status
+                ? 'bg-purple-500 text-white'
+                : 'bg-white/5 text-gray-400 hover:text-white'
+                }`}
             >
               {status}
             </button>
@@ -377,7 +376,7 @@ export function SegmentsTab({ segments, onRefresh }: any) {
           <TiltCard
             key={segment.id}
             glowColor="blue"
-            className="opacity-0 animate-slide-up"
+            className="opacity-0"
             style={{ animationDelay: `${idx * 100}ms`, animationFillMode: 'forwards' } as any}
           >
             <div className="p-6 rounded-3xl bg-white/[0.02] backdrop-blur-xl border border-white/[0.05] h-full flex flex-col">
@@ -425,15 +424,15 @@ export function TemplatesTab({ templates, onRefresh }: any) {
           <TiltCard
             key={template.id}
             glowColor="emerald"
-            className="opacity-0 animate-slide-up"
+            className="opacity-0"
             style={{ animationDelay: `${idx * 100}ms`, animationFillMode: 'forwards' } as any}
           >
             <div className="p-6 rounded-3xl bg-white/[0.02] backdrop-blur-xl border border-white/[0.05] h-full flex flex-col">
               <div className="flex items-start justify-between mb-4">
                 <div className="p-3 rounded-xl bg-emerald-500/20 text-emerald-400">
                   {template.type === 'email' ? <EnvelopeIcon className="w-6 h-6" /> :
-                   template.type === 'sms' ? <DevicePhoneMobileIcon className="w-6 h-6" /> :
-                   <ChatBubbleLeftRightIcon className="w-6 h-6" />}
+                    template.type === 'sms' ? <DevicePhoneMobileIcon className="w-6 h-6" /> :
+                      <ChatBubbleLeftRightIcon className="w-6 h-6" />}
                 </div>
                 <span className="px-3 py-1 rounded-full text-xs font-bold uppercase bg-purple-500/20 text-purple-400">
                   {template.type}
@@ -679,7 +678,7 @@ export function ExternalCampaignCard({ campaign, delay }: { campaign: any; delay
   return (
     <TiltCard
       glowColor={campaign.platform === 'google_ads' ? 'blue' : 'indigo'}
-      className="opacity-0 animate-slide-up"
+      className="opacity-0"
       style={{ animationDelay: `${delay}ms`, animationFillMode: 'forwards' } as any}
     >
       <div className={`p-6 rounded-3xl backdrop-blur-md border h-full flex flex-col ${campaign.platform === 'google_ads'

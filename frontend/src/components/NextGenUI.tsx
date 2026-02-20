@@ -13,7 +13,7 @@ export const NeonStatCard = ({
   delay,
   prefix
 }: any) => (
-  <div 
+  <div
     className="animate-fade-in-up"
     style={{ animationDelay: `${delay || 0}ms`, animationFillMode: 'forwards', opacity: 0 }}
   >
@@ -29,16 +29,21 @@ export const NeonStatCard = ({
 )
 
 // TiltCard - Card with hover effect
-export const TiltCard = ({ 
-  children, 
+export const TiltCard = ({
+  children,
   className = '',
-  glowColor
-}: { 
+  glowColor,
+  ...props
+}: {
   children: ReactNode
   className?: string
   glowColor?: string
+  [key: string]: any
 }) => (
-  <div className={`card card-hover ${className} animate-fade-in-up`}>
+  <div
+    className={`card card-hover ${className} animate-fade-in-up`}
+    {...props}
+  >
     <div className="p-6">
       {children}
     </div>

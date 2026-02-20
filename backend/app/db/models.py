@@ -233,6 +233,7 @@ class Campaign(Base):
     total_opened = Column(Integer, default=0)
     total_clicked = Column(Integer, default=0)
     total_converted = Column(Integer, default=0)
+    revenue = Column(Float, default=0.0)
     
     created_by = Column(Integer, ForeignKey("users.id"))
     created_at = Column(DateTime(timezone=True), server_default=func.now())
@@ -595,3 +596,17 @@ class AuditLog(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
     user = relationship("User", back_populates="audit_logs")
+
+class SystemSetting(Base):
+    """Global system settings and configurations"""
+    __tablename__ = "system_settings"
+
+    id = Column(Integer, primary_key=True, index=True)
+    key = Column(String, unique=True, index=True, nullable=False)
+    value = Column(Text, nullable=False)
+    description = Column(String)
+    is_encrypted = Column(Boolean, default=False)
+    group = Column(String, default="general") # e.g., 'marketing', 'security', 'billing'
+    
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    created_at = Column(DateTime(timezone=True), server_default=func.now())

@@ -39,6 +39,7 @@ class CampaignResponse(CampaignBase):
     total_opened: int
     total_clicked: int
     total_converted: int
+    revenue: Optional[float] = 0.0
     created_at: datetime
     
     class Config:

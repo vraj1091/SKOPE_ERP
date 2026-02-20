@@ -6,6 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from app.api.v1 import auth, inventory, sales, customers, financial, reports, users, campaigns, marketing, stores, chatbot, dashboard, system, automation, ads, comparison, campaign_execution
+from app.api.v1 import settings as api_settings
 from app.core.config import settings
 from app.db.database import engine
 from app.db import models
@@ -74,6 +75,7 @@ app.include_router(system.router, prefix="/api/v1/system", tags=["System"])
 app.include_router(automation.router, prefix="/api/v1/automation", tags=["Automation & AI"])
 app.include_router(ads.router, prefix="/api/v1/ads", tags=["Ad Platform Integration"])
 app.include_router(comparison.router, prefix="/api/v1/comparison", tags=["Comparison Analytics"])
+app.include_router(api_settings.router, prefix="/api/v1/settings", tags=["System Settings"])
 
 from app.api.dependencies import get_db
 from app.db.database import SessionLocal

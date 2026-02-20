@@ -261,7 +261,8 @@ def seed_database(
                 'total_sent': random.randint(150, 200),
                 'total_opened': random.randint(100, 150),
                 'total_clicked': random.randint(50, 80),
-                'total_converted': random.randint(20, 40)
+                'total_converted': random.randint(20, 40),
+                'revenue': float(random.randint(5000, 20000))
             },
             # ... (condensed list for brevity, just adding 2-3 examples)
             {
@@ -278,7 +279,8 @@ def seed_database(
                 'total_sent': random.randint(30, 50),
                 'total_opened': random.randint(25, 45),
                 'total_clicked': random.randint(15, 30),
-                'total_converted': random.randint(8, 15)
+                'total_converted': random.randint(8, 15),
+                'revenue': float(random.randint(1000, 5000))
             }
         ]
         

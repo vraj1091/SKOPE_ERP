@@ -1,18 +1,27 @@
 // Wrapper file to make old pages work with new component library
 import { ReactNode } from 'react'
 import { Card, CardHeader, CardBody } from './ui'
-export { Card as PremiumCard } from './ui'
 export { Button } from './ui'
 export { Badge } from './ui'
 
+// PremiumCard wrapper - Adds animation support
+export const PremiumCard = ({ delay, className = '', ...props }: any) => (
+  <div
+    className={`animate-fade-in-up ${className}`}
+    style={{ animationDelay: `${delay || 0}ms`, animationFillMode: 'forwards', opacity: 0 }}
+  >
+    <Card {...props} />
+  </div>
+)
+
 // Input wrapper
-export const Input = ({ 
-  placeholder, 
-  value, 
-  onChange, 
+export const Input = ({
+  placeholder,
+  value,
+  onChange,
   icon: Icon,
   className = '',
-  ...props 
+  ...props
 }: any) => (
   <div className={`relative ${className}`}>
     {Icon && (
@@ -30,20 +39,20 @@ export const Input = ({
 )
 
 // StatCard wrapper - Fixed to work with old props
-export const StatCard = ({ 
-  title, 
-  value, 
+export const StatCard = ({
+  title,
+  value,
   subtitle,
-  icon: Icon, 
+  icon: Icon,
   color,
   trend,
   trendValue,
-  delay 
+  delay
 }: any) => {
   const iconElement = Icon ? <Icon className="w-6 h-6" /> : null
-  
+
   return (
-    <div 
+    <div
       className="animate-fade-in-up"
       style={{ animationDelay: `${delay || 0}ms`, animationFillMode: 'forwards', opacity: 0 }}
     >
@@ -79,12 +88,12 @@ export const StatCard = ({
 }
 
 // PageHeader Component
-export const PageHeader = ({ 
-  title, 
-  subtitle, 
-  icon: Icon, 
-  actions 
-}: { 
+export const PageHeader = ({
+  title,
+  subtitle,
+  icon: Icon,
+  actions
+}: {
   title: string
   subtitle?: string
   icon?: any
@@ -117,12 +126,12 @@ export const Loading = ({ message }: { message?: string }) => (
 )
 
 // EmptyState Component
-export const EmptyState = ({ 
-  icon: Icon, 
-  title, 
-  message, 
-  action 
-}: { 
+export const EmptyState = ({
+  icon: Icon,
+  title,
+  message,
+  action
+}: {
   icon?: any
   title: string
   message?: string
