@@ -208,6 +208,139 @@ async def connect_meta_account(
         "connection_id": db_connection.id
     }
 
+# ============ SANDBOX / DEMO MODE ============
+
+@router.post("/sandbox/connect")
+async def connect_sandbox_account(
+    platform: str,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """
+    Connect a Sandbox/Demo account for Meta or Google Ads.
+    This simulates a real connection and populates the dashboard with realistic mock data
+    so users can experience the full functionality without paying for real ads.
+    """
+    if platform not in ["meta", "google"]:
+        raise HTTPException(status_code=400, detail="Invalid platform. Choose 'meta' or 'google'")
+    
+    # 1. Create Mock Connection
+    existing = db.query(models.AdAccountConnection).filter(
+        models.AdAccountConnection.store_id == current_user.store_id,
+        models.AdAccountConnection.platform == platform,
+        models.AdAccountConnection.is_active == True
+    ).first()
+    
+    if existing:
+        return {"message": f"{platform.title()} Sandbox account is already connected!"}
+    
+    # Generate fake IDs
+    import random
+    import string
+    
+    fake_id = ''.join(random.choices(string.digits, k=16))
+    
+    connection = models.AdAccountConnection(
+        store_id=current_user.store_id,
+        platform=platform,
+        meta_ad_account_id=f"act_{fake_id}" if platform == "meta" else None,
+        google_customer_id=f"{fake_id[:3]}-{fake_id[3:6]}-{fake_id[6:10]}" if platform == "google" else None,
+        access_token=f"mock_token_{''.join(random.choices(string.ascii_letters, k=20))}",
+        is_active=True,
+        token_expires_at=datetime.utcnow() + timedelta(days=365), # Long expiry for demo
+        created_by=current_user.id
+    )
+    
+    db.add(connection)
+    db.commit()
+    db.refresh(connection)
+    
+    # 2. Update System Setting to indicate Sandbox Mode is active for this user/store
+    # (Optional, but good for UI state)
+    
+    # 3. Generate Mock Campaigns
+    create_mock_campaigns(db, current_user, connection)
+    
+    return {
+        "message": f"{platform.title()} Sandbox account connected successfully! Mock data generated.",
+        "connection_id": connection.id,
+        "mode": "sandbox"
+    }
+
+def create_mock_campaigns(db: Session, user: models.User, connection: models.AdAccountConnection):
+    """Generates realistic mock campaigns and analytics"""
+    import random
+    
+    templates = [
+        {"name": "Summer Sale Extravaganza", "obj": "OUTCOME_SALES", "status": "ACTIVE", "roas": 4.5},
+        {"name": "New Collection Launch", "obj": "OUTCOME_AWARENESS", "status": "ACTIVE", "roas": 2.1},
+        {"name": "Retargeting - Cart Abandoners", "obj": "OUTCOME_SALES", "status": "PAUSED", "roas": 6.8},
+        {"name": "Brand Awareness Video", "obj": "OUTCOME_TRAFFIC", "status": "ACTIVE", "roas": 1.5},
+    ]
+    
+    for t in templates:
+        # Create Campaign
+        daily_budget = random.randint(500, 5000)
+        
+        campaign = models.AdCampaignCreation(
+            store_id=user.store_id,
+            ad_account_id=connection.id,
+            campaign_name=t["name"],
+            campaign_template="custom",
+            platform=connection.platform,
+            objective=t["obj"],
+            budget_daily=float(daily_budget),
+            status=models.AdCampaignStatus.ACTIVE if t["status"] == "ACTIVE" else models.AdCampaignStatus.PAUSED,
+            created_by=user.id,
+            start_date=datetime.utcnow() - timedelta(days=random.randint(10, 30))
+        )
+        db.add(campaign)
+        db.commit()
+        db.refresh(campaign)
+        
+        # Generate 30 days of Analytics
+        generate_mock_analytics(db, campaign, t["roas"])
+
+def generate_mock_analytics(db: Session, campaign: models.AdCampaignCreation, target_roas: float):
+    """Generates 30 days of realistic analytics data"""
+    import random
+    
+    end_date = datetime.utcnow()
+    start_date = end_date - timedelta(days=30)
+    
+    current = start_date
+    while current <= end_date:
+        # Randomize daily performance slightly
+        daily_volatility = random.uniform(0.8, 1.2)
+        
+        impressions = int(random.randint(1000, 5000) * daily_volatility)
+        clicks = int(impressions * random.uniform(0.01, 0.03)) # 1-3% CTR
+        spend = clicks * random.uniform(5, 15) # CPC between 5-15
+        
+        # Sales logic based on ROAS
+        revenue = spend * (target_roas * random.uniform(0.9, 1.1))
+        sales_count = int(revenue / random.randint(500, 2000)) if revenue > 0 else 0
+        leads = int(clicks * random.uniform(0.05, 0.15))
+        
+        analytics = models.AdCampaignAnalytics(
+            campaign_id=campaign.id,
+            date=current,
+            impressions=impressions,
+            clicks=clicks,
+            spend=round(spend, 2),
+            reach=int(impressions * 0.8),
+            leads=leads,
+            sales_attributed=sales_count,
+            revenue_attributed=round(revenue, 2),
+            ctr=round((clicks/impressions)*100, 2) if impressions > 0 else 0,
+            cpc=round(spend/clicks, 2) if clicks > 0 else 0,
+            roas=round(revenue/spend, 2) if spend > 0 else 0
+        )
+        db.add(analytics)
+        current += timedelta(days=1)
+    
+    db.commit()
+
 # ============ GOOGLE ADS INTEGRATION ENDPOINTS ============
 
 @router.get("/google/auth-url")

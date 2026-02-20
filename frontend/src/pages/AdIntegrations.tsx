@@ -99,6 +99,19 @@ export default function AdIntegrations() {
     }
   }
 
+  const connectSandbox = async (platform: string) => {
+    try {
+      setLoading(true)
+      await api.post(`/ads/sandbox/connect?platform=${platform}`)
+      toast.success(`${platform === 'meta' ? 'Meta' : 'Google'} Sandbox Connected!`)
+      toast.success('Generated mock campaigns and analytics data')
+      loadData() // Refresh data
+    } catch (error) {
+      toast.error(`Failed to connect ${platform} sandbox`)
+      setLoading(false)
+    }
+  }
+
   const getMetaConnection = () => connections.find(c => c.platform === 'meta')
   const getGoogleConnection = () => connections.find(c => c.platform === 'google')
 
@@ -268,13 +281,22 @@ export default function AdIntegrations() {
                 <p className="text-sm text-gray-400">
                   Connect your Meta Business account to create and manage Facebook, Instagram, and WhatsApp ads directly from SKOPE ERP.
                 </p>
-                <CyberButton
-                  onClick={handleConnectMeta}
-                  className="w-full"
-                  icon={LinkIcon}
-                >
-                  Connect Meta Business
-                </CyberButton>
+                <div className="flex gap-2">
+                  <CyberButton
+                    onClick={handleConnectMeta}
+                    className="flex-1"
+                    icon={LinkIcon}
+                  >
+                    Connect Real Account
+                  </CyberButton>
+                  <CyberButton
+                    className="flex-1"
+                    variant="secondary"
+                    onClick={() => connectSandbox('meta')}
+                  >
+                    Try Demo Mode (Free)
+                  </CyberButton>
+                </div>
               </div>
             )}
           </div>
@@ -341,14 +363,22 @@ export default function AdIntegrations() {
                 <p className="text-sm text-gray-400">
                   Connect your Google Ads account to run search, display, and YouTube campaigns targeting local customers.
                 </p>
-                <CyberButton
-                  onClick={handleConnectGoogle}
-                  className="w-full"
-                  variant="primary" // Consider a green variant if available, but primary is violet
-                  icon={LinkIcon}
-                >
-                  Connect Google Ads
-                </CyberButton>
+                <div className="flex gap-2">
+                  <CyberButton
+                    className="flex-1"
+                    variant="primary"
+                    onClick={handleConnectGoogle}
+                  >
+                    Connect Real Account
+                  </CyberButton>
+                  <CyberButton
+                    className="flex-1"
+                    variant="secondary"
+                    onClick={() => connectSandbox('google')}
+                  >
+                    Try Demo Mode (Free)
+                  </CyberButton>
+                </div>
               </div>
             )}
           </div>
