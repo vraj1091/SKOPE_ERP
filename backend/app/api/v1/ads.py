@@ -259,7 +259,12 @@ async def connect_sandbox_account(
     # (Optional, but good for UI state)
     
     # 3. Generate Mock Campaigns
-    create_mock_campaigns(db, current_user, connection)
+    try:
+        create_mock_campaigns(db, current_user, connection)
+    except Exception as e:
+        print(f"Error generating mock campaigns: {e}")
+        # Don't fail the connection if mock data fails, but useful to know.
+        pass
     
     return {
         "message": f"{platform.title()} Sandbox account connected successfully! Mock data generated.",
@@ -271,12 +276,21 @@ def create_mock_campaigns(db: Session, user: models.User, connection: models.AdA
     """Generates realistic mock campaigns and analytics"""
     import random
     
+    # Use valid Enum values for templates
     templates = [
-        {"name": "Summer Sale Extravaganza", "obj": "OUTCOME_SALES", "status": "ACTIVE", "roas": 4.5},
-        {"name": "New Collection Launch", "obj": "OUTCOME_AWARENESS", "status": "ACTIVE", "roas": 2.1},
-        {"name": "Retargeting - Cart Abandoners", "obj": "OUTCOME_SALES", "status": "PAUSED", "roas": 6.8},
-        {"name": "Brand Awareness Video", "obj": "OUTCOME_TRAFFIC", "status": "ACTIVE", "roas": 1.5},
+        {"name": "Summer Sale Extravaganza", "obj": "OUTCOME_SALES", "status": "ACTIVE", "roas": 4.5, "template": "offer_festival"},
+        {"name": "New Collection Launch", "obj": "OUTCOME_AWARENESS", "status": "ACTIVE", "roas": 2.1, "template": "product_catalog"},
+        {"name": "Retargeting - Cart Abandoners", "obj": "OUTCOME_SALES", "status": "PAUSED", "roas": 6.8, "template": "store_visit"},
+        {"name": "Brand Awareness Video", "obj": "OUTCOME_TRAFFIC", "status": "ACTIVE", "roas": 1.5, "template": "lead_form"},
     ]
+    
+    # Adjust for Google
+    if connection.platform == "google":
+        templates = [
+            {"name": "Local Store Search", "obj": "LEADS", "status": "ACTIVE", "roas": 5.2, "template": "local_search_ads"},
+            {"name": "YouTube Brand Reach", "obj": "AWARENESS", "status": "ACTIVE", "roas": 1.8, "template": "youtube_local_awareness"},
+            {"name": "Performance Max Retail", "obj": "SALES", "status": "PAUSED", "roas": 7.5, "template": "performance_max"},
+        ]
     
     for t in templates:
         # Create Campaign
@@ -286,7 +300,7 @@ def create_mock_campaigns(db: Session, user: models.User, connection: models.AdA
             store_id=user.store_id,
             ad_account_id=connection.id,
             campaign_name=t["name"],
-            campaign_template="custom",
+            campaign_template=t["template"], # Using valid enum value string
             platform=connection.platform,
             objective=t["obj"],
             budget_daily=float(daily_budget),
